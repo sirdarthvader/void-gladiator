@@ -1,0 +1,6 @@
+{
+  "name": "engine-loop",
+  "projectType": "library",
+  "root": "packages/engine-loop",
+  "sourceRoot": "packages/engine-loop/src"
+}

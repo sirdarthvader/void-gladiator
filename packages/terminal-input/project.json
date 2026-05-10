@@ -1,0 +1,6 @@
+{
+  "name": "terminal-input",
+  "projectType": "library",
+  "root": "packages/terminal-input",
+  "sourceRoot": "packages/terminal-input/src"
+}

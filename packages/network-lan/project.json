@@ -1,0 +1,6 @@
+{
+  "name": "network-lan",
+  "projectType": "library",
+  "root": "packages/network-lan",
+  "sourceRoot": "packages/network-lan/src"
+}

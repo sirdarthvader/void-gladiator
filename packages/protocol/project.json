@@ -1,0 +1,6 @@
+{
+  "name": "protocol",
+  "projectType": "library",
+  "root": "packages/protocol",
+  "sourceRoot": "packages/protocol/src"
+}

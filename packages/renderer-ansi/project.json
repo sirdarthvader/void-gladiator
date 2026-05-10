@@ -1,0 +1,6 @@
+{
+  "name": "renderer-ansi",
+  "projectType": "library",
+  "root": "packages/renderer-ansi",
+  "sourceRoot": "packages/renderer-ansi/src"
+}

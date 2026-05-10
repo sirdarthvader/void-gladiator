@@ -1,0 +1,22 @@
+{
+  "name": "cli-game",
+  "projectType": "application",
+  "root": "apps/cli-game",
+  "sourceRoot": "apps/cli-game/src",
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec tsx apps/cli-game/src/main.ts",
+        "cwd": "."
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec tsc -p tsconfig.json --noEmit",
+        "cwd": "."
+      }
+    }
+  }
+}

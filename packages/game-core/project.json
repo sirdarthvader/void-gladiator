@@ -1,0 +1,6 @@
+{
+  "name": "game-core",
+  "projectType": "library",
+  "root": "packages/game-core",
+  "sourceRoot": "packages/game-core/src"
+}

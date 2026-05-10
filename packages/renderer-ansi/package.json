@@ -1,0 +1,12 @@
+{
+  "name": "@void-gladiator/renderer-ansi",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@void-gladiator/game-core": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

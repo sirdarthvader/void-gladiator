@@ -1,0 +1,14 @@
+{
+  "name": "@void-gladiator/game-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@void-gladiator/content": "workspace:*",
+    "@void-gladiator/protocol": "workspace:*",
+    "@void-gladiator/shared": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

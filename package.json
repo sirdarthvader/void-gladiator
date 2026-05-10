@@ -1,0 +1,27 @@
+{
+  "name": "void-gladiator",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.32.1",
+  "scripts": {
+    "preinstall": "corepack enable || echo 'Warning: corepack not available — install pnpm@10.32.1 manually'",
+    "dev": "nx run cli-game:dev",
+    "typecheck": "pnpm -r exec tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run --passWithNoTests",
+    "graph": "nx graph"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "eslint": "^9.26.0",
+    "eslint-config-prettier": "^10.1.2",
+    "nx": "^20.8.1",
+    "prettier": "^3.5.3",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.3"
+  }
+}

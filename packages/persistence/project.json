@@ -1,0 +1,6 @@
+{
+  "name": "persistence",
+  "projectType": "library",
+  "root": "packages/persistence",
+  "sourceRoot": "packages/persistence/src"
+}

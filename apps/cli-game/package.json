@@ -1,0 +1,15 @@
+{
+  "name": "@void-gladiator/cli-game",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@void-gladiator/content": "workspace:*",
+    "@void-gladiator/engine-loop": "workspace:*",
+    "@void-gladiator/game-core": "workspace:*",
+    "@void-gladiator/persistence": "workspace:*",
+    "@void-gladiator/protocol": "workspace:*",
+    "@void-gladiator/renderer-ansi": "workspace:*",
+    "@void-gladiator/terminal-input": "workspace:*"
+  }
+}

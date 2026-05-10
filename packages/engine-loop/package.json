@@ -1,0 +1,12 @@
+{
+  "name": "@void-gladiator/engine-loop",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@void-gladiator/shared": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

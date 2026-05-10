@@ -1,0 +1,6 @@
+{
+  "name": "content",
+  "projectType": "library",
+  "root": "packages/content",
+  "sourceRoot": "packages/content/src"
+}
