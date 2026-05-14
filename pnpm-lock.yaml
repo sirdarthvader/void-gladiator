@@ -95,6 +95,9 @@ importers:
 
   packages/renderer-ansi:
     dependencies:
+      '@void-gladiator/content':
+        specifier: workspace:*
+        version: link:../content
       '@void-gladiator/game-core':
         specifier: workspace:*
         version: link:../game-core

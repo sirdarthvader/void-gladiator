@@ -126,7 +126,7 @@ describe('enemy spawning', () => {
     state = spawnEnemy(state, 'shardling');
     expect(state.enemies).toHaveLength(1);
     expect(state.enemies[0].kind).toBe('shardling');
-    expect(state.enemies[0].glyph).toBe('s');
+    expect(state.enemies[0].glyph).toBe('◊');
   });
 
   it('spawns at arena edge', () => {

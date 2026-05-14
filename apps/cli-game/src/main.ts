@@ -1,23 +1,19 @@
 import { createTicker } from '@void-gladiator/engine-loop';
-import {
-  createInitialGameState,
-  tickGameState,
-} from '@void-gladiator/game-core';
-import type { GameState } from '@void-gladiator/game-core';
-import { renderArenaFrame } from '@void-gladiator/renderer-ansi';
-import {
-  createTerminalInput,
-  describeLocalControls,
-} from '@void-gladiator/terminal-input';
-import type { GameCommand } from '@void-gladiator/protocol';
+import { createTitleState, tickApp } from '@void-gladiator/game-core';
+import type { AppState } from '@void-gladiator/game-core';
+import { renderFrame } from '@void-gladiator/renderer-ansi';
+import { createSceneInput } from '@void-gladiator/terminal-input';
+import type { SceneContext } from '@void-gladiator/terminal-input';
+import type { Command } from '@void-gladiator/protocol';
 
-let state: GameState = createInitialGameState();
-let pendingCommands: GameCommand[] = [];
-const _controls = describeLocalControls();
+let state: AppState = createTitleState();
+let pendingCommands: Command[] = [];
 
-const renderFrame = (): void => {
+const getScene = (): SceneContext => state.scene;
+
+const render = (): void => {
   process.stdout.write('\x1b[2J\x1b[H');
-  process.stdout.write(renderArenaFrame(state));
+  process.stdout.write(renderFrame(state));
   process.stdout.write('\n');
 };
 
@@ -32,33 +28,34 @@ const shutdown = (): never => {
 const ticker = createTicker({
   fps: 30,
   tick: () => {
-    state = tickGameState(state, { commands: pendingCommands });
-    pendingCommands = [];
-    renderFrame();
-
-    if (state.gameOver) {
-      // Let the player see the death screen briefly before exiting
-      setTimeout(() => {
-        shutdown();
-      }, 2000);
-      ticker.stop();
+    // Build per-player command map (single-player: all commands go to player 0)
+    const commandsByPlayer = new Map<number, readonly Command[]>();
+    if (pendingCommands.length > 0) {
+      commandsByPlayer.set(0, [...pendingCommands]);
     }
+    pendingCommands = [];
+
+    // Advance state
+    state = tickApp(state, { commandsByPlayer });
+
+    // Render
+    render();
   },
 });
 
-const terminalInput = createTerminalInput({
+const terminalInput = createSceneInput({
   onCommand: (command) => {
     if (command === 'quit') {
       shutdown();
       return;
     }
-
     pendingCommands.push(command);
   },
+  getScene,
 });
 
 if (process.env.VOID_GLADIATOR_ONCE === '1') {
-  renderFrame();
+  render();
 } else {
   process.stdout.write('\x1b[?25h');
   process.stdout.write('\x1b[?25l');
