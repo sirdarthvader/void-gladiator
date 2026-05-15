@@ -24,4 +24,3 @@ export type { EnemyKind, EnemyDefinition } from './enemies.js';
 // Modes
 export { GAME_MODES, GAME_MODE_LIST } from './modes.js';
 export type { GameModeId, GameModeConfig } from './modes.js';
-

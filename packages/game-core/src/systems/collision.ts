@@ -51,7 +51,12 @@ export const resolveProjectileEnemyCollisions = (
 
   const aliveEnemies = enemies.filter((e) => e.health > 0);
 
-  return { ...state, projectiles: survivingProjectiles, enemies: aliveEnemies, players };
+  return {
+    ...state,
+    projectiles: survivingProjectiles,
+    enemies: aliveEnemies,
+    players,
+  };
 };
 
 /**

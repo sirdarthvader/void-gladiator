@@ -145,7 +145,11 @@ const initRespawnTimers = (state: GameplayState): GameplayState => {
   if (state.teamLives <= 0) return state;
 
   const players = state.players.map((player) => {
-    if (player.status === 'dead' && player.respawnTimer === 0 && player.health <= 0) {
+    if (
+      player.status === 'dead' &&
+      player.respawnTimer === 0 &&
+      player.health <= 0
+    ) {
       return { ...player, respawnTimer: PLAYER_RESPAWN_TICKS };
     }
     return player;
@@ -166,9 +170,7 @@ const checkRoundOver = (state: GameplayState): GameplayState => {
   if (alivePlayers.length <= 1) {
     const winnerId = alivePlayers.length === 1 ? alivePlayers[0].id : null;
     const players = state.players.map((p) =>
-      p.id === winnerId
-        ? { ...p, roundWins: p.roundWins + 1 }
-        : p
+      p.id === winnerId ? { ...p, roundWins: p.roundWins + 1 } : p
     );
     return { ...state, roundOver: true, roundWinnerId: winnerId, players };
   }
@@ -185,7 +187,9 @@ const checkMatchOver = (state: GameplayState): GameplayState => {
 
   if (modeConfig.hasRounds) {
     // Void Duel: check if someone has enough round wins
-    const winner = state.players.find((p) => p.roundWins >= modeConfig.roundsToWin);
+    const winner = state.players.find(
+      (p) => p.roundWins >= modeConfig.roundsToWin
+    );
     if (winner) {
       return { ...state, matchOver: true, matchWinnerId: winner.id };
     }

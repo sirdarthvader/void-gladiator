@@ -33,7 +33,7 @@ export const resolvePlayerInput = (
       const vec = DIRECTION_VECTORS[dir];
       nextPlayer = {
         ...nextPlayer,
-        x: clamp(nextPlayer.x + vec.x, 0, arenaWidth - 1),
+        x: clamp(nextPlayer.x + vec.x, 0, arenaWidth - 2),
         y: clamp(nextPlayer.y + vec.y, 0, arenaHeight - 1),
         facing: dir,
       };

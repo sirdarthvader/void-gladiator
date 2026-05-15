@@ -56,11 +56,22 @@ const flattenCommands = (
 const filterGameCommands = (
   commandsByPlayer: ReadonlyMap<number, readonly Command[]>
 ): ReadonlyMap<number, readonly GameCommand[]> => {
-  const gameCommands = ['move_up', 'move_down', 'move_left', 'move_right', 'fire', 'dash', 'special', 'quit'];
+  const gameCommands = [
+    'move_up',
+    'move_down',
+    'move_left',
+    'move_right',
+    'fire',
+    'dash',
+    'special',
+    'quit',
+  ];
   const filtered = new Map<number, readonly GameCommand[]>();
 
   for (const [playerId, commands] of commandsByPlayer) {
-    const gc = commands.filter((c): c is GameCommand => gameCommands.includes(c));
+    const gc = commands.filter((c): c is GameCommand =>
+      gameCommands.includes(c)
+    );
     if (gc.length > 0) {
       filtered.set(playerId, gc);
     }

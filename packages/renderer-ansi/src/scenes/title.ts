@@ -9,6 +9,7 @@ import {
 } from '../colors.js';
 import { buildTopBorder, buildBottomBorder } from '../components/ui.js';
 import { ARENA_WIDTH } from '@void-gladiator/content';
+import { stringWidth, cursorToCol } from '../char-width.js';
 
 const TITLE_ART = [
   '╦  ╦╔═╗╦╔╦╗',
@@ -20,28 +21,22 @@ const TITLE_ART = [
   '╚═╝╩═╝╩ ╩═╩╝╩╩ ╩ ╩ ╚═╝╩╚═',
 ];
 
-/** Strip ANSI codes to get the visible character count. */
-const visibleLength = (text: string): number =>
-  text.replace(/\x1b\[[0-9;]*m/g, '').length;
-
 /**
  * Wrap content in a bordered row: ║<content padded to width>║
  * Correctly handles ANSI codes when calculating padding.
  */
 const borderedRow = (content: string, width: number): string => {
-  const visible = visibleLength(content);
-  const rightPad = Math.max(0, width - visible);
-  return `${DIM}║${RESET}${content}${' '.repeat(rightPad)}${DIM}║${RESET}`;
+  const rightPad = Math.max(0, width - stringWidth(content));
+  return `${DIM}║${RESET}${content}${' '.repeat(rightPad)}${cursorToCol(width + 2)}${DIM}║${RESET}`;
 };
 
 /** Create an empty bordered row. */
 const emptyRow = (width: number): string =>
-  `${DIM}║${' '.repeat(width)}║${RESET}`;
+  `${DIM}║${' '.repeat(width)}${cursorToCol(width + 2)}║${RESET}`;
 
 /** Center text visually within a width, returning padded string. */
 const centerInWidth = (text: string, width: number): string => {
-  const visible = visibleLength(text);
-  const leftPad = Math.max(0, Math.floor((width - visible) / 2));
+  const leftPad = Math.max(0, Math.floor((width - stringWidth(text)) / 2));
   return ' '.repeat(leftPad) + text;
 };
 

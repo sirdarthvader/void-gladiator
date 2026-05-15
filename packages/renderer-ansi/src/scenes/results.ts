@@ -1,29 +1,20 @@
 import type { ResultsScene } from '@void-gladiator/game-core';
 import { PLAYER_VISUALS } from '@void-gladiator/content';
-import {
-  RESET,
-  BOLD,
-  DIM,
-  YELLOW,
-  WHITE_BRIGHT,
-} from '../colors.js';
+import { RESET, BOLD, DIM, YELLOW, WHITE_BRIGHT } from '../colors.js';
 import { buildTopBorder, buildBottomBorder } from '../components/ui.js';
 import { ARENA_WIDTH } from '@void-gladiator/content';
-
-/** Strip ANSI codes to get the visible character count. */
-const visibleLength = (text: string): number =>
-  text.replace(/\x1b\[[0-9;]*m/g, '').length;
+import { stringWidth, cursorToCol } from '../char-width.js';
 
 const borderedRow = (content: string, width: number): string => {
-  const rightPad = Math.max(0, width - visibleLength(content));
-  return `${DIM}║${RESET}${content}${' '.repeat(rightPad)}${DIM}║${RESET}`;
+  const rightPad = Math.max(0, width - stringWidth(content));
+  return `${DIM}║${RESET}${content}${' '.repeat(rightPad)}${cursorToCol(width + 2)}${DIM}║${RESET}`;
 };
 
 const emptyRow = (width: number): string =>
-  `${DIM}║${' '.repeat(width)}║${RESET}`;
+  `${DIM}║${' '.repeat(width)}${cursorToCol(width + 2)}║${RESET}`;
 
 const centerInWidth = (text: string, width: number): string => {
-  const leftPad = Math.max(0, Math.floor((width - visibleLength(text)) / 2));
+  const leftPad = Math.max(0, Math.floor((width - stringWidth(text)) / 2));
   return ' '.repeat(leftPad) + text;
 };
 
@@ -58,7 +49,7 @@ export const renderResults = (state: ResultsScene): string => {
   // Player stats table header
   const tableHeader = `${DIM}   Player      Score   Kills  Deaths  Streak${RESET}`;
   rows.push(borderedRow(tableHeader, width));
-  rows.push(`${DIM}║${'─'.repeat(width)}║${RESET}`);
+  rows.push(`${DIM}║${'─'.repeat(width)}${cursorToCol(width + 2)}║${RESET}`);
 
   // Player rows (sorted by score descending)
   const sorted = [...results.players].sort((a, b) => b.score - a.score);

@@ -30,7 +30,7 @@ export const updateEnemyAI = (state: GameplayState): GameplayState => {
       } else {
         y += dy > 0 ? 1 : -1;
       }
-      x = clamp(x, 0, state.arenaWidth - 1);
+      x = clamp(x, 0, state.arenaWidth - 2);
       y = clamp(y, 0, state.arenaHeight - 1);
     }
 

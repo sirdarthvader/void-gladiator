@@ -19,6 +19,7 @@ import {
   buildHealthBar,
   padRight,
 } from '../components/ui.js';
+import { charWidth, cursorToCol } from '../char-width.js';
 
 const PROJECTILE_GLYPHS: Record<string, string> = {
   up: PROJ_VERTICAL,
@@ -34,6 +35,7 @@ export const renderGameplay = (state: GameplayScene): string => {
   const { gameplay: gs } = state;
   const rows: string[] = [];
   const totalWidth = gs.arenaWidth + 2; // arena + 2 border chars
+  const rightCol = cursorToCol(gs.arenaWidth + 2); // force right border column
 
   // HUD top line — player stats
   const hudParts: string[] = [];
@@ -46,9 +48,10 @@ export const renderGameplay = (state: GameplayScene): string => {
     );
   }
 
-  const waveInfo = gs.mode === 'void_storm'
-    ? `${DIM}Wave ${gs.wave}${RESET}`
-    : `${DIM}Round ${gs.round}${RESET}`;
+  const waveInfo =
+    gs.mode === 'void_storm'
+      ? `${DIM}Wave ${gs.wave}${RESET}`
+      : `${DIM}Round ${gs.round}${RESET}`;
 
   const hudLine = `${CYAN}${BOLD}VOID GLADIATOR${RESET}  ${hudParts.join('  ')}  ${waveInfo}`;
   rows.push(padRight(hudLine, totalWidth));
@@ -79,8 +82,18 @@ export const renderGameplay = (state: GameplayScene): string => {
   // Render arena rows
   for (let y = 0; y < gs.arenaHeight; y += 1) {
     let row = LEFT_BORDER;
+    let skipNext = false;
 
     for (let x = 0; x < gs.arenaWidth; x += 1) {
+      // A previous wide character already covers this cell visually.
+      if (skipNext) {
+        skipNext = false;
+        continue;
+      }
+
+      let rawChar = ' ';
+      let cell = ' ';
+
       // Check if any player is here
       const playerHere = gs.players.find(
         (p) => p.x === x && p.y === y && p.status === 'alive'
@@ -88,10 +101,10 @@ export const renderGameplay = (state: GameplayScene): string => {
 
       if (playerHere) {
         const visual = PLAYER_VISUALS[playerHere.id % PLAYER_VISUALS.length];
-        const isFlashing =
-          playerHere.invincibilityTicks > 0 && gs.tick % 4 < 2;
+        const isFlashing = playerHere.invincibilityTicks > 0 && gs.tick % 4 < 2;
         const color = isFlashing ? DIM : `${BOLD}${visual.colorCode}`;
-        row += `${color}${playerHere.glyph}${RESET}`;
+        rawChar = playerHere.glyph;
+        cell = `${color}${rawChar}${RESET}`;
       } else {
         // Check for dead players (show ghost)
         const deadHere = gs.players.find(
@@ -100,19 +113,24 @@ export const renderGameplay = (state: GameplayScene): string => {
 
         if (deadHere) {
           const visual = PLAYER_VISUALS[deadHere.id % PLAYER_VISUALS.length];
-          row += `${DIM}${visual.colorCode}✕${RESET}`;
+          rawChar = '✕';
+          cell = `${DIM}${visual.colorCode}${rawChar}${RESET}`;
         } else {
           const entity = entityMap.get(`${x},${y}`);
           if (entity) {
-            row += `${entity.color}${entity.char}${RESET}`;
-          } else {
-            row += ' ';
+            rawChar = entity.char;
+            cell = `${entity.color}${rawChar}${RESET}`;
           }
         }
       }
+
+      row += cell;
+      if (charWidth(rawChar) > 1) {
+        skipNext = true;
+      }
     }
 
-    row += RIGHT_BORDER;
+    row += rightCol + RIGHT_BORDER;
     rows.push(row);
   }
 
@@ -121,31 +139,46 @@ export const renderGameplay = (state: GameplayScene): string => {
 
   // Bottom status bar
   if (gs.matchOver) {
-    const winnerText = gs.matchWinnerId !== null
-      ? `${PLAYER_VISUALS[gs.matchWinnerId % PLAYER_VISUALS.length].colorCode}${BOLD}Player ${gs.matchWinnerId + 1} WINS!${RESET}`
-      : `${RED}${BOLD}DEFEATED${RESET}`;
-    rows.push(padRight(`${winnerText}  ${DIM}Final tick: ${gs.tick}${RESET}`, totalWidth));
+    const winnerText =
+      gs.matchWinnerId !== null
+        ? `${PLAYER_VISUALS[gs.matchWinnerId % PLAYER_VISUALS.length].colorCode}${BOLD}Player ${gs.matchWinnerId + 1} WINS!${RESET}`
+        : `${RED}${BOLD}DEFEATED${RESET}`;
+    rows.push(
+      padRight(
+        `${winnerText}  ${DIM}Final tick: ${gs.tick}${RESET}`,
+        totalWidth
+      )
+    );
   } else if (gs.roundOver) {
-    const winnerText = gs.roundWinnerId !== null
-      ? `${PLAYER_VISUALS[gs.roundWinnerId % PLAYER_VISUALS.length].colorCode}Round ${gs.round} — Player ${gs.roundWinnerId + 1} wins!${RESET}`
-      : `${YELLOW}Round draw${RESET}`;
+    const winnerText =
+      gs.roundWinnerId !== null
+        ? `${PLAYER_VISUALS[gs.roundWinnerId % PLAYER_VISUALS.length].colorCode}Round ${gs.round} — Player ${gs.roundWinnerId + 1} wins!${RESET}`
+        : `${YELLOW}Round draw${RESET}`;
     rows.push(padRight(winnerText, totalWidth));
   } else {
     // Show local player status (player 0 for now)
     const p0 = gs.players[0];
     if (p0 && p0.status === 'alive') {
-      const fireStatus = p0.fireCooldown > 0
-        ? `${DIM}reloading${RESET}`
-        : `${GREEN}ready${RESET}`;
-      const streakStr = p0.streak > 1
-        ? `  ${YELLOW}${BOLD}×${p0.streak}${RESET}`
-        : '';
+      const fireStatus =
+        p0.fireCooldown > 0
+          ? `${DIM}reloading${RESET}`
+          : `${GREEN}ready${RESET}`;
+      const streakStr =
+        p0.streak > 1 ? `  ${YELLOW}${BOLD}×${p0.streak}${RESET}` : '';
       rows.push(
-        padRight(`${DIM}WASD:move Space:fire K:dash J:special Q:quit${RESET}  Fire: ${fireStatus}${streakStr}`, totalWidth)
+        padRight(
+          `${DIM}WASD:move Space:fire K:dash J:special Q:quit${RESET}  Fire: ${fireStatus}${streakStr}`,
+          totalWidth
+        )
       );
     } else if (p0 && p0.status === 'dead') {
       const respawnSec = Math.ceil(p0.respawnTimer / 30);
-      rows.push(padRight(`${RED}DEFEATED${RESET} ${DIM}— respawning in ${respawnSec}s${RESET}`, totalWidth));
+      rows.push(
+        padRight(
+          `${RED}DEFEATED${RESET} ${DIM}— respawning in ${respawnSec}s${RESET}`,
+          totalWidth
+        )
+      );
     }
   }
 

@@ -21,11 +21,11 @@ export const spawnEnemy = (
 
   switch (edge) {
     case 0: // top
-      x = Math.floor(Math.random() * state.arenaWidth);
+      x = Math.floor(Math.random() * (state.arenaWidth - 1));
       y = 0;
       break;
     case 1: // bottom
-      x = Math.floor(Math.random() * state.arenaWidth);
+      x = Math.floor(Math.random() * (state.arenaWidth - 1));
       y = state.arenaHeight - 1;
       break;
     case 2: // left
@@ -33,7 +33,7 @@ export const spawnEnemy = (
       y = Math.floor(Math.random() * state.arenaHeight);
       break;
     default: // right
-      x = state.arenaWidth - 1;
+      x = state.arenaWidth - 2;
       y = Math.floor(Math.random() * state.arenaHeight);
       break;
   }

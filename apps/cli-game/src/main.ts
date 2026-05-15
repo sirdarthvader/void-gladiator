@@ -12,16 +12,19 @@ let pendingCommands: Command[] = [];
 const getScene = (): SceneContext => state.scene;
 
 const render = (): void => {
-  process.stdout.write('\x1b[2J\x1b[H');
+  // renderFrame() positions each row absolutely (CUP) and includes a
+  // trailing \x1b[J to clear below FRAME_HEIGHT. A single write keeps
+  // the frame atomic — no partial-frame flashes.
   process.stdout.write(renderFrame(state));
-  process.stdout.write('\n');
 };
 
 const shutdown = (): never => {
   terminalInput.detach();
   ticker.stop();
+  // Restore: show cursor, leave alt screen
   process.stdout.write('\x1b[?25h');
-  process.stdout.write('\nExiting Void Gladiator.\n');
+  process.stdout.write('\x1b[?1049l');
+  process.stdout.write('Exiting Void Gladiator.\n');
   process.exit(0);
 };
 
@@ -57,7 +60,11 @@ const terminalInput = createSceneInput({
 if (process.env.VOID_GLADIATOR_ONCE === '1') {
   render();
 } else {
-  process.stdout.write('\x1b[?25h');
+  // Enter alternate screen buffer (blank canvas, restores terminal on exit).
+  // \x1b[2J explicitly clears it — some terminals (incl. VS Code's xterm.js)
+  // don't blank the alt buffer on entry, so leftover glyphs can bleed through
+  // the first frame.
+  process.stdout.write('\x1b[?1049h\x1b[2J\x1b[H');
   process.stdout.write('\x1b[?25l');
   terminalInput.attach();
   ticker.start();

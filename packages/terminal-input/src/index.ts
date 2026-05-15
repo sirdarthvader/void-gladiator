@@ -1,16 +1,5 @@
 import type { GameCommand, Command } from '@void-gladiator/protocol';
 
-const commandLabels: Record<GameCommand, string> = {
-  move_up: 'W',
-  move_down: 'S',
-  move_left: 'A',
-  move_right: 'D',
-  fire: 'Space',
-  dash: 'K',
-  special: 'J',
-  quit: 'Q',
-};
-
 const keyToGameCommand: Record<string, GameCommand | undefined> = {
   '\u0003': 'quit',
   q: 'quit',
@@ -35,49 +24,6 @@ export interface TerminalInputController {
   detach: () => void;
 }
 
-export interface CreateTerminalInputOptions {
-  onCommand: (command: GameCommand) => void;
-  stream?: NodeJS.ReadStream;
-}
-
-export const createTerminalInput = ({
-  onCommand,
-  stream = process.stdin,
-}: CreateTerminalInputOptions): TerminalInputController => {
-  const handleData = (chunk: Buffer | string): void => {
-    const input = typeof chunk === 'string' ? chunk : chunk.toString('utf8');
-
-    for (const character of input) {
-      const command = keyToGameCommand[character];
-
-      if (command) {
-        onCommand(command);
-      }
-    }
-  };
-
-  return {
-    attach: () => {
-      if (stream.isTTY) {
-        stream.setRawMode(true);
-      }
-
-      stream.setEncoding('utf8');
-      stream.resume();
-      stream.on('data', handleData);
-    },
-    detach: () => {
-      stream.off('data', handleData);
-
-      if (stream.isTTY) {
-        stream.setRawMode(false);
-      }
-
-      stream.pause();
-    },
-  };
-};
-
 /**
  * Scene-aware input controller.
  * Maps keys differently based on the current scene context.
@@ -90,12 +36,14 @@ export interface SceneInputOptions {
   stream?: NodeJS.ReadStream;
 }
 
-// Arrow key escape sequences
 const ARROW_UP = '\x1b[A';
 const ARROW_DOWN = '\x1b[B';
 const ARROW_RIGHT = '\x1b[C';
 const ARROW_LEFT = '\x1b[D';
 
+// puts stdin in raw mode and listens for key presses, mapping them to game commands based on the current scene context.
+// It handles both single-character inputs and multi-character escape sequences (like arrow keys), emitting commands through the provided callback.
+// The controller can be attached and detached to manage event listeners and terminal modes cleanly.
 export const createSceneInput = ({
   onCommand,
   getScene,
@@ -107,19 +55,17 @@ export const createSceneInput = ({
     const input = typeof chunk === 'string' ? chunk : chunk.toString('utf8');
     const scene = getScene();
 
-    // Handle escape sequences (arrow keys)
     const fullInput = escBuffer + input;
     escBuffer = '';
 
     for (let i = 0; i < fullInput.length; i++) {
       const char = fullInput[i];
 
-      // Check for escape sequence start
       if (char === '\x1b') {
         const remaining = fullInput.slice(i);
         if (remaining.startsWith(ARROW_LEFT)) {
           emitForScene(scene, 'arrow_left', onCommand);
-          i += 2; // skip [D
+          i += 2;
           continue;
         } else if (remaining.startsWith(ARROW_RIGHT)) {
           emitForScene(scene, 'arrow_right', onCommand);
@@ -134,15 +80,13 @@ export const createSceneInput = ({
           i += 2;
           continue;
         } else if (remaining.length < 3) {
-          // Incomplete escape sequence, buffer for next chunk
+          // Incomplete escape sequence — buffer for next chunk.
           escBuffer = remaining;
           break;
         }
-        // Unknown escape sequence, skip
         continue;
       }
 
-      // Regular character handling
       emitCharForScene(scene, char, onCommand);
     }
   };
@@ -173,14 +117,9 @@ const emitForScene = (
   arrow: ArrowKey,
   emit: (cmd: Command) => void
 ): void => {
-  switch (scene) {
-    case 'lobby':
-      if (arrow === 'arrow_left') emit('select_mode_prev');
-      if (arrow === 'arrow_right') emit('select_mode_next');
-      break;
-    case 'gameplay':
-      // Arrows not used in gameplay (WASD only)
-      break;
+  if (scene === 'lobby') {
+    if (arrow === 'arrow_left') emit('select_mode_prev');
+    if (arrow === 'arrow_right') emit('select_mode_next');
   }
 };
 
@@ -189,7 +128,7 @@ const emitCharForScene = (
   char: string,
   emit: (cmd: Command) => void
 ): void => {
-  // Quit is universal
+  // Quit is universal.
   if (char === '\u0003' || char === 'q' || char === 'Q') {
     emit('quit');
     return;
@@ -197,7 +136,6 @@ const emitCharForScene = (
 
   switch (scene) {
     case 'title':
-      // Any key transitions
       if (char === ' ' || char === '\r') emit('confirm');
       break;
 
@@ -218,25 +156,4 @@ const emitCharForScene = (
       if (char === 'r' || char === 'R') emit('rematch');
       break;
   }
-};
-
-export const describeLocalControls = (): string => {
-  return Object.entries(commandLabels)
-    .map(([command, key]) => `${key}:${command}`)
-    .join(' ');
-};
-export type InputState = {
-  firePressed: boolean;
-  moveX: -1 | 0 | 1;
-  moveY: -1 | 0 | 1;
-  specialPressed: boolean;
-};
-
-export const createIdleInputState = (): InputState => {
-  return {
-    firePressed: false,
-    moveX: 0,
-    moveY: 0,
-    specialPressed: false,
-  };
 };
