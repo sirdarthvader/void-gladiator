@@ -1,5 +1,20 @@
 # @void-gladiator/cli-game
 
+## 0.1.1
+
+### Patch Changes
+
+- [`013de21`](https://github.com/sirdarthvader/void-gladiator/commit/013de218e1bb3f5349203033d8813b87c041828d) Thanks [@sirdarthvader](https://github.com/sirdarthvader)! - Add codeowners
+
+- Updated dependencies [[`013de21`](https://github.com/sirdarthvader/void-gladiator/commit/013de218e1bb3f5349203033d8813b87c041828d)]:
+  - @void-gladiator/content@0.1.1
+  - @void-gladiator/engine-loop@0.0.2
+  - @void-gladiator/game-core@0.0.2
+  - @void-gladiator/persistence@0.0.2
+  - @void-gladiator/protocol@0.0.2
+  - @void-gladiator/renderer-ansi@0.1.1
+  - @void-gladiator/terminal-input@0.0.2
+
 ## 0.1.0
 
 ### Minor Changes
