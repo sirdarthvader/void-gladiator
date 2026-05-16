@@ -1,5 +1,23 @@
 # @void-gladiator/cli-game
 
+## 0.2.0
+
+### Minor Changes
+
+- [`cbc17af`](https://github.com/sirdarthvader/void-gladiator/commit/cbc17af8900c49f2683a8bf8eff32dc028b4bf6f) Thanks [@sirdarthvader](https://github.com/sirdarthvader)! - Version bump for enhacned renderer
+
+### Patch Changes
+
+- Updated dependencies [[`cbc17af`](https://github.com/sirdarthvader/void-gladiator/commit/cbc17af8900c49f2683a8bf8eff32dc028b4bf6f), [`cbc17af`](https://github.com/sirdarthvader/void-gladiator/commit/cbc17af8900c49f2683a8bf8eff32dc028b4bf6f)]:
+  - @void-gladiator/renderer-ansi@1.0.0
+  - @void-gladiator/renderer-tk@1.0.0
+  - @void-gladiator/content@0.2.0
+  - @void-gladiator/engine-loop@0.1.0
+  - @void-gladiator/game-core@0.1.0
+  - @void-gladiator/persistence@0.1.0
+  - @void-gladiator/protocol@0.1.0
+  - @void-gladiator/terminal-input@0.1.0
+
 ## 0.1.1
 
 ### Patch Changes
