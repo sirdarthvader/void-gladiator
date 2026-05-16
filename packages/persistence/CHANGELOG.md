@@ -1,5 +1,11 @@
 # @void-gladiator/persistence
 
+## 0.0.2
+
+### Patch Changes
+
+- [`013de21`](https://github.com/sirdarthvader/void-gladiator/commit/013de218e1bb3f5349203033d8813b87c041828d) Thanks [@sirdarthvader](https://github.com/sirdarthvader)! - Add codeowners
+
 ## 0.0.1
 
 ### Patch Changes
