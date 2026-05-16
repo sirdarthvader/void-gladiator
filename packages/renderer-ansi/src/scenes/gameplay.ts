@@ -1,13 +1,13 @@
 import type { GameplayScene } from '@void-gladiator/game-core';
 import { PLAYER_VISUALS } from '@void-gladiator/content';
 import {
-  RESET,
-  BOLD,
-  DIM,
-  CYAN,
-  RED,
-  GREEN,
-  YELLOW,
+  bold,
+  dim,
+  cyan,
+  red,
+  green,
+  yellow,
+  colorize,
   PROJ_HORIZONTAL,
   PROJ_VERTICAL,
 } from '../colors.js';
@@ -42,40 +42,45 @@ export const renderGameplay = (state: GameplayScene): string => {
   for (const player of gs.players) {
     const visual = PLAYER_VISUALS[player.id % PLAYER_VISUALS.length];
     const hp = buildHealthBar(player.health, player.maxHealth);
-    const statusDim = player.status !== 'alive' ? DIM : '';
-    hudParts.push(
-      `${statusDim}${visual.colorCode}${visual.glyph}${RESET}${statusDim} ${hp} ${DIM}${player.score}${RESET}`
-    );
+    const glyph = colorize(visual.color, visual.glyph);
+    const statusWrap = player.status !== 'alive' ? dim : (s: string) => s;
+    hudParts.push(`${statusWrap(glyph)} ${hp} ${dim(String(player.score))}`);
   }
 
   const waveInfo =
     gs.mode === 'void_storm'
-      ? `${DIM}Wave ${gs.wave}${RESET}`
-      : `${DIM}Round ${gs.round}${RESET}`;
+      ? dim(`Wave ${gs.wave}`)
+      : dim(`Round ${gs.round}`);
 
-  const hudLine = `${CYAN}${BOLD}VOID GLADIATOR${RESET}  ${hudParts.join('  ')}  ${waveInfo}`;
+  const hudLine = `${cyan(bold('VOID GLADIATOR'))}  ${hudParts.join('  ')}  ${waveInfo}`;
   rows.push(padRight(hudLine, totalWidth));
 
   // Arena border (top)
   rows.push(buildTopBorder(gs.arenaWidth));
 
   // Build entity lookup map
-  const entityMap = new Map<string, { char: string; color: string }>();
+  const entityMap = new Map<
+    string,
+    { char: string; style: (s: string) => string }
+  >();
 
   for (const enemy of gs.enemies) {
     entityMap.set(`${Math.round(enemy.x)},${Math.round(enemy.y)}`, {
       char: enemy.glyph,
-      color: RED,
+      style: red,
     });
   }
 
   for (const proj of gs.projectiles) {
     const glyph = PROJECTILE_GLYPHS[proj.direction] ?? '•';
     const visual = PLAYER_VISUALS[proj.ownerId % PLAYER_VISUALS.length];
-    const color = proj.ownerId >= 0 ? visual.colorCode : RED;
+    const styleFn =
+      proj.ownerId >= 0
+        ? (s: string) => bold(colorize(visual.color, s))
+        : (s: string) => bold(red(s));
     entityMap.set(`${Math.round(proj.x)},${Math.round(proj.y)}`, {
       char: glyph,
-      color: `${BOLD}${color}`,
+      style: styleFn,
     });
   }
 
@@ -102,9 +107,10 @@ export const renderGameplay = (state: GameplayScene): string => {
       if (playerHere) {
         const visual = PLAYER_VISUALS[playerHere.id % PLAYER_VISUALS.length];
         const isFlashing = playerHere.invincibilityTicks > 0 && gs.tick % 4 < 2;
-        const color = isFlashing ? DIM : `${BOLD}${visual.colorCode}`;
         rawChar = playerHere.glyph;
-        cell = `${color}${rawChar}${RESET}`;
+        cell = isFlashing
+          ? dim(rawChar)
+          : bold(colorize(visual.color, rawChar));
       } else {
         // Check for dead players (show ghost)
         const deadHere = gs.players.find(
@@ -114,12 +120,12 @@ export const renderGameplay = (state: GameplayScene): string => {
         if (deadHere) {
           const visual = PLAYER_VISUALS[deadHere.id % PLAYER_VISUALS.length];
           rawChar = '✕';
-          cell = `${DIM}${visual.colorCode}${rawChar}${RESET}`;
+          cell = dim(colorize(visual.color, rawChar));
         } else {
           const entity = entityMap.get(`${x},${y}`);
           if (entity) {
             rawChar = entity.char;
-            cell = `${entity.color}${rawChar}${RESET}`;
+            cell = entity.style(rawChar);
           }
         }
       }
@@ -141,33 +147,36 @@ export const renderGameplay = (state: GameplayScene): string => {
   if (gs.matchOver) {
     const winnerText =
       gs.matchWinnerId !== null
-        ? `${PLAYER_VISUALS[gs.matchWinnerId % PLAYER_VISUALS.length].colorCode}${BOLD}Player ${gs.matchWinnerId + 1} WINS!${RESET}`
-        : `${RED}${BOLD}DEFEATED${RESET}`;
+        ? bold(
+            colorize(
+              PLAYER_VISUALS[gs.matchWinnerId % PLAYER_VISUALS.length].color,
+              `Player ${gs.matchWinnerId + 1} WINS!`
+            )
+          )
+        : bold(red('DEFEATED'));
     rows.push(
-      padRight(
-        `${winnerText}  ${DIM}Final tick: ${gs.tick}${RESET}`,
-        totalWidth
-      )
+      padRight(`${winnerText}  ${dim(`Final tick: ${gs.tick}`)}`, totalWidth)
     );
   } else if (gs.roundOver) {
     const winnerText =
       gs.roundWinnerId !== null
-        ? `${PLAYER_VISUALS[gs.roundWinnerId % PLAYER_VISUALS.length].colorCode}Round ${gs.round} — Player ${gs.roundWinnerId + 1} wins!${RESET}`
-        : `${YELLOW}Round draw${RESET}`;
+        ? colorize(
+            PLAYER_VISUALS[gs.roundWinnerId % PLAYER_VISUALS.length].color,
+            `Round ${gs.round} — Player ${gs.roundWinnerId + 1} wins!`
+          )
+        : yellow('Round draw');
     rows.push(padRight(winnerText, totalWidth));
   } else {
     // Show local player status (player 0 for now)
     const p0 = gs.players[0];
     if (p0 && p0.status === 'alive') {
       const fireStatus =
-        p0.fireCooldown > 0
-          ? `${DIM}reloading${RESET}`
-          : `${GREEN}ready${RESET}`;
+        p0.fireCooldown > 0 ? dim('reloading') : green('ready');
       const streakStr =
-        p0.streak > 1 ? `  ${YELLOW}${BOLD}×${p0.streak}${RESET}` : '';
+        p0.streak > 1 ? `  ${yellow(bold(`×${p0.streak}`))}` : '';
       rows.push(
         padRight(
-          `${DIM}WASD:move Space:fire K:dash J:special Q:quit${RESET}  Fire: ${fireStatus}${streakStr}`,
+          `${dim('WASD:move Space:fire K:dash J:special Q:quit')}  Fire: ${fireStatus}${streakStr}`,
           totalWidth
         )
       );
@@ -175,7 +184,7 @@ export const renderGameplay = (state: GameplayScene): string => {
       const respawnSec = Math.ceil(p0.respawnTimer / 30);
       rows.push(
         padRight(
-          `${RED}DEFEATED${RESET} ${DIM}— respawning in ${respawnSec}s${RESET}`,
+          `${red('DEFEATED')} ${dim(`— respawning in ${respawnSec}s`)}`,
           totalWidth
         )
       );

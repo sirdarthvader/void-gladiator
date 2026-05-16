@@ -1,13 +1,13 @@
 import type { LobbyScene } from '@void-gladiator/game-core';
 import { GAME_MODES, PLAYER_VISUALS } from '@void-gladiator/content';
 import {
-  RESET,
-  BOLD,
-  DIM,
-  CYAN,
-  GREEN,
-  YELLOW,
-  WHITE_BRIGHT,
+  bold,
+  dim,
+  cyan,
+  green,
+  yellow,
+  whiteBright,
+  colorize,
 } from '../colors.js';
 import { buildTopBorder, buildBottomBorder } from '../components/ui.js';
 import { ARENA_WIDTH } from '@void-gladiator/content';
@@ -16,11 +16,11 @@ import { stringWidth, cursorToCol } from '../char-width.js';
 /** Wrap content in a bordered row, correctly handling ANSI padding. */
 const borderedRow = (content: string, width: number): string => {
   const rightPad = Math.max(0, width - stringWidth(content));
-  return `${DIM}║${RESET}${content}${' '.repeat(rightPad)}${cursorToCol(width + 2)}${DIM}║${RESET}`;
+  return `${dim('|')}${content}${' '.repeat(rightPad)}${cursorToCol(width + 2)}${dim('|')}`;
 };
 
 const emptyRow = (width: number): string =>
-  `${DIM}║${' '.repeat(width)}${cursorToCol(width + 2)}║${RESET}`;
+  `${dim('|')}${' '.repeat(width)}${cursorToCol(width + 2)}${dim('|')}`;
 
 const centerInWidth = (text: string, width: number): string => {
   const leftPad = Math.max(0, Math.floor((width - stringWidth(text)) / 2));
@@ -40,7 +40,7 @@ export const renderLobby = (state: LobbyScene): string => {
   rows.push(buildTopBorder(width));
 
   // Header
-  const header = `${CYAN}${BOLD}V O I D   G L A D I A T O R${RESET}`;
+  const header = cyan(bold('V O I D   G L A D I A T O R'));
   rows.push(borderedRow(centerInWidth(header, width), width));
   rows.push(emptyRow(width));
 
@@ -51,14 +51,12 @@ export const renderLobby = (state: LobbyScene): string => {
 
     let line: string;
     if (player) {
-      const readyStr = player.ready
-        ? `${GREEN}${BOLD}READY${RESET}`
-        : `${DIM}waiting${RESET}`;
-      const glyph = `${visual.colorCode}${visual.glyph}${RESET}`;
+      const readyStr = player.ready ? green(bold('READY')) : dim('waiting');
+      const glyph = colorize(visual.color, visual.glyph);
       const dots = '.'.repeat(Math.max(0, 28 - player.name.length));
-      line = `   ${glyph} ${player.name} ${DIM}${dots}${RESET} ${readyStr}`;
+      line = `   ${glyph} ${player.name} ${dim(dots)} ${readyStr}`;
     } else {
-      line = `   ${DIM}${visual.glyph} (empty)${RESET}`;
+      line = `   ${dim(`${visual.glyph} (empty)`)}`;
     }
     rows.push(borderedRow(line, width));
   }
@@ -66,15 +64,15 @@ export const renderLobby = (state: LobbyScene): string => {
   rows.push(emptyRow(width));
 
   // Mode selection
-  const modeLine = `   Mode: ${YELLOW}${BOLD}[${mode.name.toUpperCase()}]${RESET}  ${DIM}<< >> to change${RESET}`;
+  const modeLine = `   Mode: ${yellow(bold(`[${mode.name.toUpperCase()}]`))}  ${dim('<< >> to change')}`;
   rows.push(borderedRow(modeLine, width));
 
   // Mode description
-  const descLine = `   ${DIM}${mode.description}${RESET}`;
+  const descLine = `   ${dim(mode.description)}`;
   rows.push(borderedRow(descLine, width));
 
   // Player range
-  const rangeLine = `   ${DIM}Players: ${mode.minPlayers}-${mode.maxPlayers}${RESET}`;
+  const rangeLine = `   ${dim(`Players: ${mode.minPlayers}-${mode.maxPlayers}`)}`;
   rows.push(borderedRow(rangeLine, width));
 
   rows.push(emptyRow(width));
@@ -85,13 +83,15 @@ export const renderLobby = (state: LobbyScene): string => {
 
   if (lobby.countdown !== null) {
     const seconds = Math.ceil(lobby.countdown / 30);
-    const countdownLine = `${WHITE_BRIGHT}${BOLD}Starting in ${seconds}...${RESET}`;
+    const countdownLine = whiteBright(bold(`Starting in ${seconds}...`));
     rows.push(borderedRow(centerInWidth(countdownLine, width), width));
   } else if (allReady && !hasEnoughPlayers) {
-    const warnLine = `${YELLOW}${BOLD}Need ${mode.minPlayers}+ players for ${mode.name}${RESET}`;
+    const warnLine = yellow(
+      bold(`Need ${mode.minPlayers}+ players for ${mode.name}`)
+    );
     rows.push(borderedRow(centerInWidth(warnLine, width), width));
   } else {
-    const instrLine = `${DIM}SPACE: toggle ready │ A/D: mode │ Q: quit${RESET}`;
+    const instrLine = dim('SPACE: toggle ready │ A/D: mode │ Q: quit');
     rows.push(borderedRow(centerInWidth(instrLine, width), width));
   }
 

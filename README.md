@@ -4,11 +4,11 @@ A real-time top-down ASCII arena shooter played entirely in the terminal. Surviv
 
 ## Prerequisites
 
-| Tool       | Version  | Install                                      |
-| ---------- | -------- | -------------------------------------------- |
-| Node.js    | ≥ 18     | [nodejs.org](https://nodejs.org/)            |
-| pnpm       | 10.x     | `corepack enable && corepack prepare pnpm@10 --activate` |
-| Nx         | ≥ 20     | Included as a dev dependency                 |
+| Tool    | Version | Install                                                  |
+| ------- | ------- | -------------------------------------------------------- |
+| Node.js | ≥ 18    | [nodejs.org](https://nodejs.org/)                        |
+| pnpm    | 10.x    | `corepack enable && corepack prepare pnpm@10 --activate` |
+| Nx      | ≥ 20    | Included as a dev dependency                             |
 
 > **Note:** The `preinstall` script automatically runs `corepack enable` to pin pnpm to the version declared in `package.json`. No manual setup needed — just run `pnpm install` and Corepack takes care of the rest.
 
@@ -132,10 +132,27 @@ Deeper design context lives in the root:
 
 | Document                   | Purpose                                                    |
 | -------------------------- | ---------------------------------------------------------- |
-| `VOID_GLADIATOR_SPEC.md`  | Locked game design spec (enemies, upgrades, controls, MVP) |
-| `TECH_ARCHITECTURE.md`    | Technical architecture decisions                           |
-| `MONOREPO_ARCHITECTURE.md`| Package boundaries and dependency rules                    |
-| `GAME_DESIGN.md`          | Original brainstorm and design exploration                 |
+| `VOID_GLADIATOR_SPEC.md`   | Locked game design spec (enemies, upgrades, controls, MVP) |
+| `TECH_ARCHITECTURE.md`     | Technical architecture decisions                           |
+| `MONOREPO_ARCHITECTURE.md` | Package boundaries and dependency rules                    |
+| `GAME_DESIGN.md`           | Original brainstorm and design exploration                 |
+
+Rendering Pipeline
+
+terminal-input → command buffer → game-core tick → GameState
+↓
+renderFrame(state) [renderer-ansi]
+↓
+scene renderer (gameplay/lobby/title/results)
+returns raw string
+↓
+normalizeFrame(raw) [frame-buffer]
+• split into lines
+• clamp each to FRAME_WIDTH
+• diff against prevLines
+• emit only changed lines with cursorTo()
+↓
+process.stdout.write() [main.ts]
 
 ## Contributing
 

@@ -1,5 +1,5 @@
 import { ARENA_WIDTH, ARENA_HEIGHT } from '@void-gladiator/content';
-import { RESET } from './colors.js';
+import ansiEscapes from 'ansi-escapes';
 import { clampToWidth } from './char-width.js';
 
 /**
@@ -18,33 +18,60 @@ export const FRAME_HEIGHT = ARENA_HEIGHT + 10;
  * Handles double-width Unicode characters correctly.
  */
 const clampLine = (line: string, width: number): string =>
-  clampToWidth(line, width, RESET);
+  clampToWidth(line, width);
+
+// ── Delta rendering ──────────────────────────────────────────────────
+// Stores the previous frame's clamped line content so we can compare
+// and only emit lines that actually changed. This dramatically reduces
+// the amount of data written to stdout each tick.
+
+let prevLines: string[] = [];
 
 /**
- * Normalize a rendered frame to fixed dimensions.
- * - Each row is anchored at column 1 via CUP (absolute positioning)
- * - Each row is clamped/padded to exactly FRAME_WIDTH visible characters
- * - Each row ends with \x1b[K (erase-to-end-of-line) to clear any residual
- *   characters beyond FRAME_WIDTH without the flicker of a full line erase
- * - Total rows are clamped to FRAME_HEIGHT (padded or truncated)
- * - Trailing \x1b[J clears anything below FRAME_HEIGHT
+ * Reset the delta buffer.
+ * Call this when switching scenes or when the terminal is resized
+ * to force a full redraw of the next frame.
+ */
+export const resetFrameBuffer = (): void => {
+  prevLines = [];
+};
+
+/**
+ * Normalize a rendered frame to fixed dimensions with delta rendering.
  *
- * \x1b[<n>;1H = move cursor to row n, column 1 (CUP).
- * \x1b[K      = erase from cursor to end of line.
+ * - Each changed row is anchored at column 1 via CUP (absolute positioning)
+ * - Each changed row is clamped/padded to exactly FRAME_WIDTH visible chars
+ * - Each changed row ends with eraseEndOfLine to clear residual characters
+ * - Total rows are clamped to FRAME_HEIGHT (padded or truncated)
+ * - Unchanged rows are skipped entirely (delta optimization)
+ * - On first frame or after reset, all rows are written
  */
 export const normalizeFrame = (raw: string): string => {
   const lines = raw.split('\n');
   const output: string[] = [];
+  const currentLines: string[] = [];
 
   for (let i = 0; i < FRAME_HEIGHT; i++) {
     const content =
       i < lines.length
         ? clampLine(lines[i], FRAME_WIDTH)
         : ' '.repeat(FRAME_WIDTH);
-    output.push(`\x1b[${i + 1};1H${content}\x1b[K`);
+
+    currentLines.push(content);
+
+    // Delta: only write lines that differ from the previous frame
+    if (content !== prevLines[i]) {
+      output.push(
+        ansiEscapes.cursorTo(0, i) + content + ansiEscapes.eraseEndLine
+      );
+    }
   }
 
-  // Clear anything below the frame (in case terminal is taller)
-  output.push('\x1b[J');
+  // Clear anything below the frame on first render or if frame shrank
+  if (prevLines.length === 0 || prevLines.length > FRAME_HEIGHT) {
+    output.push(ansiEscapes.cursorTo(0, FRAME_HEIGHT) + ansiEscapes.eraseDown);
+  }
+
+  prevLines = currentLines;
   return output.join('');
 };
