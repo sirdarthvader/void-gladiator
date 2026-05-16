@@ -1,5 +1,13 @@
 // Arena
-export { GAME_TITLE, ARENA_WIDTH, ARENA_HEIGHT, MAX_PLAYERS } from './arena.js';
+export {
+  GAME_TITLE,
+  ARENA_WIDTH,
+  ARENA_HEIGHT,
+  ARENA_MARGIN_X,
+  ARENA_MARGIN_Y,
+  MAX_PLAYERS,
+  isTerminalTooSmall,
+} from './arena.js';
 
 // Player
 export {

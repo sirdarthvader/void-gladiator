@@ -4,8 +4,13 @@ import type { Command } from '@void-gladiator/protocol';
 /**
  * Create the initial title scene state.
  */
-export const createTitleState = (): TitleScene => ({
+export const createTitleState = (
+  arenaWidth: number,
+  arenaHeight: number
+): TitleScene => ({
   scene: 'title',
+  arenaWidth,
+  arenaHeight,
   animationTick: 0,
 });
 
@@ -24,6 +29,8 @@ export const tickTitle = (
   if (hasInput) {
     return {
       scene: 'lobby',
+      arenaWidth: state.arenaWidth,
+      arenaHeight: state.arenaHeight,
       lobby: {
         players: [{ id: 0, name: 'Player 1', ready: false }],
         selectedMode: 'void_storm',

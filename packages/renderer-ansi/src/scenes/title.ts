@@ -1,7 +1,6 @@
 import type { TitleScene } from '@void-gladiator/game-core';
 import { bold, dim, cyan, whiteBright } from '../colors.js';
 import { buildTopBorder, buildBottomBorder } from '../components/ui.js';
-import { ARENA_WIDTH } from '@void-gladiator/content';
 import { stringWidth, cursorToCol } from '../char-width.js';
 
 /**
@@ -27,7 +26,7 @@ const centerInWidth = (text: string, width: number): string => {
  * Render the title screen.
  */
 export const renderTitle = (_state: TitleScene): string => {
-  const width = ARENA_WIDTH;
+  const width = _state.arenaWidth;
   const rows: string[] = [];
 
   rows.push('');

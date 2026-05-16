@@ -14,6 +14,8 @@ export const tickResults = (
     if (command === 'rematch' || command === 'return_to_lobby') {
       return {
         scene: 'lobby',
+        arenaWidth: state.arenaWidth,
+        arenaHeight: state.arenaHeight,
         lobby: createLobbyState(state.results.players.length),
       };
     }
@@ -21,6 +23,8 @@ export const tickResults = (
       // Quit is handled at the app shell level, but signal via lobby
       return {
         scene: 'lobby',
+        arenaWidth: state.arenaWidth,
+        arenaHeight: state.arenaHeight,
         lobby: createLobbyState(state.results.players.length),
       };
     }

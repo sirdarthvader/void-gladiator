@@ -7,6 +7,8 @@ import type { ResultsState } from './results-state.js';
  */
 export interface TitleScene {
   scene: 'title';
+  arenaWidth: number;
+  arenaHeight: number;
   animationTick: number;
 }
 
@@ -15,6 +17,8 @@ export interface TitleScene {
  */
 export interface LobbyScene {
   scene: 'lobby';
+  arenaWidth: number;
+  arenaHeight: number;
   lobby: LobbyState;
 }
 
@@ -23,6 +27,8 @@ export interface LobbyScene {
  */
 export interface GameplayScene {
   scene: 'gameplay';
+  arenaWidth: number;
+  arenaHeight: number;
   gameplay: GameplayState;
 }
 
@@ -31,11 +37,16 @@ export interface GameplayScene {
  */
 export interface ResultsScene {
   scene: 'results';
+  arenaWidth: number;
+  arenaHeight: number;
   results: ResultsState;
 }
 
 /**
  * The top-level application state — a discriminated union of scenes.
  * The renderer and tick function switch on `state.scene` to determine behavior.
+ *
+ * `arenaWidth` and `arenaHeight` are available on every scene, set once
+ * at startup from the terminal dimensions and carried through transitions.
  */
 export type AppState = TitleScene | LobbyScene | GameplayScene | ResultsScene;

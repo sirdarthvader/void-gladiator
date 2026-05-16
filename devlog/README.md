@@ -4,4 +4,4 @@ Feature development logs for Void Gladiator. Each file documents a feature's pla
 
 | File | Feature | Status |
 |------|---------|--------|
-| [001-renderer-tk.md](./001-renderer-tk.md) | Enhanced terminal-kit renderer | Phase 1 — Not started |
+| [001-renderer-tk.md](./001-renderer-tk.md) | Enhanced terminal-kit renderer | Phase 1 ✅ — Phase 2 next |

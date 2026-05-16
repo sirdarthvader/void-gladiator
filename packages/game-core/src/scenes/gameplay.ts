@@ -4,8 +4,6 @@ import type { PlayerState } from '../types/entities.js';
 import type { GameCommand } from '@void-gladiator/protocol';
 import type { GameModeId } from '@void-gladiator/content';
 import {
-  ARENA_WIDTH,
-  ARENA_HEIGHT,
   GAME_MODES,
   PLAYER_MAX_HEALTH,
   PLAYER_VISUALS,
@@ -25,21 +23,31 @@ import { tickCooldowns } from '../systems/cooldowns.js';
 import { sandboxAutoSpawn } from '../systems/spawning.js';
 
 /**
- * Spawn positions for players — corners of the arena.
+ * Compute spawn positions for players — corners of the arena.
+ * Dynamically based on arena dimensions.
  */
-const SPAWN_POSITIONS: readonly { x: number; y: number }[] = [
+const getSpawnPositions = (
+  arenaWidth: number,
+  arenaHeight: number
+): readonly { x: number; y: number }[] => [
   { x: 3, y: 3 },
-  { x: ARENA_WIDTH - 4, y: 3 },
-  { x: 3, y: ARENA_HEIGHT - 4 },
-  { x: ARENA_WIDTH - 4, y: ARENA_HEIGHT - 4 },
+  { x: arenaWidth - 4, y: 3 },
+  { x: 3, y: arenaHeight - 4 },
+  { x: arenaWidth - 4, y: arenaHeight - 4 },
 ];
 
 /**
  * Create a fresh PlayerState for a given slot.
  */
-const createPlayer = (id: number, _name: string): PlayerState => {
+const createPlayer = (
+  id: number,
+  _name: string,
+  arenaWidth: number,
+  arenaHeight: number
+): PlayerState => {
   const visual = PLAYER_VISUALS[id % PLAYER_VISUALS.length];
-  const spawn = SPAWN_POSITIONS[id % SPAWN_POSITIONS.length];
+  const spawnPositions = getSpawnPositions(arenaWidth, arenaHeight);
+  const spawn = spawnPositions[id % spawnPositions.length];
   return {
     id,
     x: spawn.x,
@@ -66,14 +74,18 @@ const createPlayer = (id: number, _name: string): PlayerState => {
  */
 export const createGameplayState = (
   mode: GameModeId,
-  playerInfos: readonly { id: number; name: string }[]
+  playerInfos: readonly { id: number; name: string }[],
+  arenaWidth: number,
+  arenaHeight: number
 ): GameplayState => {
   const modeConfig = GAME_MODES[mode];
-  const players = playerInfos.map((info) => createPlayer(info.id, info.name));
+  const players = playerInfos.map((info) =>
+    createPlayer(info.id, info.name, arenaWidth, arenaHeight)
+  );
 
   return {
-    arenaWidth: ARENA_WIDTH,
-    arenaHeight: ARENA_HEIGHT,
+    arenaWidth,
+    arenaHeight,
     players,
     projectiles: [],
     enemies: [],
@@ -120,7 +132,8 @@ const processRespawns = (state: GameplayState): GameplayState => {
     if (teamLives <= 0) return player;
 
     teamLives -= 1;
-    const spawn = SPAWN_POSITIONS[player.id % SPAWN_POSITIONS.length];
+    const spawnPositions = getSpawnPositions(state.arenaWidth, state.arenaHeight);
+    const spawn = spawnPositions[player.id % spawnPositions.length];
     return {
       ...player,
       x: spawn.x,
@@ -217,6 +230,8 @@ export const tickGameplay = (
     // Transition to results when match ends
     return {
       scene: 'results',
+      arenaWidth: state.arenaWidth,
+      arenaHeight: state.arenaHeight,
       results: {
         mode: gs.mode,
         winnerId: gs.matchWinnerId,

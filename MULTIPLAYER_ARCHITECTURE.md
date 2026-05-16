@@ -655,6 +655,34 @@ The current `GameState` has a single `player`. For multiplayer, we'll extend it 
 The simulation change is minimal — the host just processes each player's commands
 independently in the same tick.
 
+### Why is the arena a fixed size instead of filling the terminal?
+
+The simulation arena is a fixed 72×30 grid — identical for all players, regardless of their
+terminal size. This guarantees deterministic multiplayer: same spawn positions, same collision
+boundaries, same game world. If each player's arena were sized to their terminal, they'd
+effectively be playing different games.
+
+The **renderer** fills the available terminal by centering the fixed arena within it. Players
+with larger terminals get more padding/chrome around the arena, not a gameplay advantage.
+
+```
+┌─────────────── terminal (120×40) ────────────────┐
+│                                                   │
+│    ┌──── arena (72×30) ────┐                      │
+│    │  (simulation space)   │   extra space for:   │
+│    │  same for all players │   - wider HUD        │
+│    └───────────────────────┘   - chat panel       │
+│                                - decorative border│
+└───────────────────────────────────────────────────┘
+```
+
+### Where is the Citadel source code?
+
+Citadel is maintained at [github.com/vipul0092/citadel](https://github.com/vipul0092/citadel).
+Install via Homebrew: `brew tap vipul0092/citadel && brew install citadel`.
+The Go binary handles LAN discovery, TCP connections, heartbeats, and chat — the game code
+only needs a thin TCP client that speaks Citadel's length-prefixed JSON wire protocol.
+
 ---
 
 _This document lives at `MULTIPLAYER_ARCHITECTURE.md` in the repo root.  

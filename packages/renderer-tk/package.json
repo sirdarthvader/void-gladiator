@@ -1,0 +1,17 @@
+{
+  "name": "@void-gladiator/renderer-tk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@void-gladiator/content": "workspace:*",
+    "@void-gladiator/game-core": "workspace:*",
+    "terminal-kit": "^3.1.2"
+  },
+  "devDependencies": {
+    "@types/terminal-kit": "^2.5.6"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

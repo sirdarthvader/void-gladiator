@@ -1,6 +1,6 @@
 # 001 — Enhanced Terminal-Kit Renderer (`renderer-tk`)
 
-**Status:** Phase 1 — Not started  
+**Status:** Phase 2 — Not started  
 **Package:** `@void-gladiator/renderer-tk`
 
 ---
@@ -45,19 +45,19 @@ The existing `renderer-ansi` gets a thin adapter wrapping its `renderFrame()` st
 
 ## Phases
 
-### Phase 1: Foundation + Gameplay Scene _(current)_
+### Phase 1: Foundation + Gameplay Scene _(complete)_
 
 Core ScreenBuffer infrastructure, sprite system, gameplay scene with rich visuals, app wiring.
 
 | Task | Description | Status |
 |------|-------------|--------|
-| 1a. Package scaffold | Create `packages/renderer-tk/` — package.json, project.json, tsconfig.json, src/index.ts. Install `terminal-kit`. | ⬜ |
-| 1b. Renderer interface | Define `Renderer` interface. Adapt `renderer-ansi` with wrapper. | ⬜ |
-| 1c. ScreenBuffer core | Init terminal-kit, create ScreenBuffer at frame dimensions, delta draw loop, cursor/alt-screen management. | ⬜ |
-| 1d. Sprite system | `Sprite` type (2D cell array + transparency). Sprite defs for players (3×3), enemies, projectiles. | ⬜ |
-| 1e. Gameplay scene | Arena borders, player sprites, enemy sprites, projectiles, HUD — all via ScreenBuffer. | ⬜ |
-| 1f. App integration | `--renderer=enhanced\|classic` flag + `VOID_RENDERER` env var in `cli-game`. | ⬜ |
-| 1g. Remaining scenes | Title, lobby, results screens via ScreenBuffer. | ⬜ |
+| 1a. Package scaffold | Create `packages/renderer-tk/` — package.json, project.json, tsconfig.json, src/index.ts. Install `terminal-kit`. | ✅ |
+| 1b. Renderer interface | Define `Renderer` interface. Adapt `renderer-ansi` with wrapper. | ✅ |
+| 1c. ScreenBuffer core | Init terminal-kit, create ScreenBuffer at frame dimensions, delta draw loop, cursor/alt-screen management. | ✅ |
+| 1d. Sprite system | `Sprite` type (2D cell array + transparency). Sprite defs for players (3×3), enemies, projectiles. | ✅ |
+| 1e. Gameplay scene | Arena borders, player sprites, enemy sprites, projectiles, HUD — all via ScreenBuffer. | ✅ |
+| 1f. App integration | `--renderer=enhanced\|classic` flag + `VOID_RENDERER` env var in `cli-game`. | ✅ |
+| 1g. Remaining scenes | Title, lobby, results screens via ScreenBuffer. | ✅ |
 
 ### Phase 2: Particle & Effect System
 
@@ -114,10 +114,31 @@ Particles, screen shake, flash timers — all live outside `GameState`. The simu
 
 _Updated as work progresses. Newest entries at top._
 
-<!-- Example entry:
-### 2026-05-17 — Phase 1a complete
-- Scaffolded `packages/renderer-tk/` with terminal-kit dep
-- Verified `pnpm typecheck` passes
--->
+### 2026-05-17 — Fixed arena for multiplayer determinism
+- Reverted dynamic arena sizing: simulation uses fixed `ARENA_WIDTH=72` / `ARENA_HEIGHT=30`
+- Terminal size check now validates against fixed arena + margins (74×34 minimum)
+- Removed `ArenaConfig`, `createArenaConfig()`, `MIN_*` constants
+- Renderers unchanged — they read dimensions from state, which now carries fixed constants
+- Added FAQ entries to `MULTIPLAYER_ARCHITECTURE.md`: fixed arena rationale + Citadel repo link
+- Design principle: simulation size = fixed (multiplayer-safe), rendering viewport = flexible (future enhancement)
 
-_(no entries yet)_
+### 2026-05-17 — Dynamic arena sizing
+- Arena now fills the entire terminal: `arenaWidth = cols - 2`, `arenaHeight = rows - 4`
+- Dimensions computed once at launch via `createArenaConfig()`, locked for the session
+- Minimum terminal size enforced (42×19): shows "terminal too small" message and exits if below
+- `ARENA_WIDTH`/`ARENA_HEIGHT` constants replaced with `DEFAULT_ARENA_WIDTH`/`DEFAULT_ARENA_HEIGHT`
+- `arenaWidth`/`arenaHeight` added to every scene type in `AppState`, threaded through all transitions
+- Spawn positions computed dynamically from arena size (corners)
+- Both renderers updated: frame buffer / ScreenBuffer sized from state, not constants
+- All typecheck, lint, and tests pass
+
+### 2026-05-16 — Phase 1 complete
+- Scaffolded `packages/renderer-tk/` with terminal-kit + @types/terminal-kit
+- Defined `Renderer` interface (init/render/cleanup) in `src/types.ts`
+- Built ScreenBuffer core (`src/screen.ts`): buffer creation, terminal lifecycle, cell/text/sprite drawing helpers with arena coordinate mapping and bounds clipping
+- Sprite system (`src/sprites.ts`): 3×3 player sprites (4 unique gladiator shapes), 1×1 enemy/projectile glyphs, dead marker
+- All 4 scene renderers: title (pulsing prompt), lobby (slots/mode/countdown), gameplay (borders, floor grid dots, entities, HUD, status bar), results (stats table, winner announcement)
+- Renderer factory (`src/renderer.ts`): scene dispatch, delta/full redraw management
+- App integration: `cli-game` uses `Renderer` interface, switches via `--renderer=enhanced` flag or `VOID_RENDERER` env var (default: `classic`)
+- Classic renderer adapter wraps existing `renderer-ansi` behind the same interface
+- All typecheck, lint, and tests pass

@@ -2,7 +2,6 @@ import type { ResultsScene } from '@void-gladiator/game-core';
 import { PLAYER_VISUALS } from '@void-gladiator/content';
 import { bold, dim, yellow, whiteBright, colorize } from '../colors.js';
 import { buildTopBorder, buildBottomBorder } from '../components/ui.js';
-import { ARENA_WIDTH } from '@void-gladiator/content';
 import { stringWidth, cursorToCol } from '../char-width.js';
 
 const borderedRow = (content: string, width: number): string => {
@@ -23,7 +22,7 @@ const centerInWidth = (text: string, width: number): string => {
  */
 export const renderResults = (state: ResultsScene): string => {
   const { results } = state;
-  const width = ARENA_WIDTH;
+  const width = state.arenaWidth;
   const rows: string[] = [];
 
   rows.push('');

@@ -113,9 +113,13 @@ export const tickLobby = (
       // Transition to gameplay
       return {
         scene: 'gameplay',
+        arenaWidth: state.arenaWidth,
+        arenaHeight: state.arenaHeight,
         gameplay: createGameplayState(
           lobby.selectedMode,
-          lobby.players.map((p) => ({ id: p.id, name: p.name }))
+          lobby.players.map((p) => ({ id: p.id, name: p.name })),
+          state.arenaWidth,
+          state.arenaHeight
         ),
       };
     }

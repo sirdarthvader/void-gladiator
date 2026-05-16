@@ -1,0 +1,6 @@
+{
+  "name": "renderer-tk",
+  "projectType": "library",
+  "root": "packages/renderer-tk",
+  "sourceRoot": "packages/renderer-tk/src"
+}

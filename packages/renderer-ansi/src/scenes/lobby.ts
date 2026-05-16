@@ -10,7 +10,6 @@ import {
   colorize,
 } from '../colors.js';
 import { buildTopBorder, buildBottomBorder } from '../components/ui.js';
-import { ARENA_WIDTH } from '@void-gladiator/content';
 import { stringWidth, cursorToCol } from '../char-width.js';
 
 /** Wrap content in a bordered row, correctly handling ANSI padding. */
@@ -32,7 +31,7 @@ const centerInWidth = (text: string, width: number): string => {
  */
 export const renderLobby = (state: LobbyScene): string => {
   const { lobby } = state;
-  const width = ARENA_WIDTH;
+  const width = state.arenaWidth;
   const rows: string[] = [];
   const mode = GAME_MODES[lobby.selectedMode];
 
