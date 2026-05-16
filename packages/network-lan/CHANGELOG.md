@@ -1,5 +1,16 @@
 # @void-gladiator/network-lan
 
+## 0.1.0
+
+### Minor Changes
+
+- [`cbc17af`](https://github.com/sirdarthvader/void-gladiator/commit/cbc17af8900c49f2683a8bf8eff32dc028b4bf6f) Thanks [@sirdarthvader](https://github.com/sirdarthvader)! - Version bump for enhacned renderer
+
+### Patch Changes
+
+- Updated dependencies [[`cbc17af`](https://github.com/sirdarthvader/void-gladiator/commit/cbc17af8900c49f2683a8bf8eff32dc028b4bf6f)]:
+  - @void-gladiator/protocol@0.1.0
+
 ## 0.0.2
 
 ### Patch Changes
