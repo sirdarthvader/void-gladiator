@@ -1,7 +1,7 @@
 ---
-"@void-gladiator/renderer-ansi": minor
-"@void-gladiator/content": minor
-"@void-gladiator/cli-game": minor
+'@void-gladiator/renderer-ansi': minor
+'@void-gladiator/content': minor
+'@void-gladiator/cli-game': minor
 ---
 
 New rendering engine: chalk + ansi-escapes + delta rendering
