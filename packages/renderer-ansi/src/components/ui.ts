@@ -1,15 +1,14 @@
 import {
-  RESET,
-  DIM,
+  dim,
+  green,
+  yellow,
+  red,
   BOX_HORIZONTAL,
   BOX_VERTICAL,
   BOX_TOP_LEFT,
   BOX_TOP_RIGHT,
   BOX_BOTTOM_LEFT,
   BOX_BOTTOM_RIGHT,
-  GREEN,
-  YELLOW,
-  RED,
 } from '../colors.js';
 import { stringWidth, cursorToCol } from '../char-width.js';
 
@@ -17,25 +16,25 @@ import { stringWidth, cursorToCol } from '../char-width.js';
  * Build a box-drawing top border.
  */
 export const buildTopBorder = (width: number): string => {
-  return `${DIM}${BOX_TOP_LEFT}${BOX_HORIZONTAL.repeat(width)}${cursorToCol(width + 2)}${BOX_TOP_RIGHT}${RESET}`;
+  return `${dim(BOX_TOP_LEFT + BOX_HORIZONTAL.repeat(width))}${cursorToCol(width + 2)}${dim(BOX_TOP_RIGHT)}`;
 };
 
 /**
  * Build a box-drawing bottom border.
  */
 export const buildBottomBorder = (width: number): string => {
-  return `${DIM}${BOX_BOTTOM_LEFT}${BOX_HORIZONTAL.repeat(width)}${cursorToCol(width + 2)}${BOX_BOTTOM_RIGHT}${RESET}`;
+  return `${dim(BOX_BOTTOM_LEFT + BOX_HORIZONTAL.repeat(width))}${cursorToCol(width + 2)}${dim(BOX_BOTTOM_RIGHT)}`;
 };
 
 /**
  * Left border character.
  */
-export const LEFT_BORDER = `${DIM}${BOX_VERTICAL}${RESET}`;
+export const LEFT_BORDER = dim(BOX_VERTICAL);
 
 /**
  * Right border character.
  */
-export const RIGHT_BORDER = `${DIM}${BOX_VERTICAL}${RESET}`;
+export const RIGHT_BORDER = dim(BOX_VERTICAL);
 
 /**
  * Build a health bar with filled/empty hearts.
@@ -43,8 +42,8 @@ export const RIGHT_BORDER = `${DIM}${BOX_VERTICAL}${RESET}`;
 export const buildHealthBar = (health: number, maxHealth: number): string => {
   const filled = '♥'.repeat(Math.max(0, health));
   const empty = '♡'.repeat(Math.max(0, maxHealth - health));
-  const color = health > 2 ? GREEN : health > 1 ? YELLOW : RED;
-  return `${color}${filled}${DIM}${empty}${RESET}`;
+  const colorFn = health > 2 ? green : health > 1 ? yellow : red;
+  return `${colorFn(filled)}${dim(empty)}`;
 };
 
 /**
@@ -54,11 +53,11 @@ export const buildBar = (
   current: number,
   max: number,
   segments: number,
-  filledColor: string
+  filledColor: (s: string) => string
 ): string => {
   const filled = Math.round((current / max) * segments);
   const empty = segments - filled;
-  return `${filledColor}${'▓'.repeat(filled)}${DIM}${'░'.repeat(empty)}${RESET}`;
+  return `${filledColor('▓'.repeat(filled))}${dim('░'.repeat(empty))}`;
 };
 
 /**

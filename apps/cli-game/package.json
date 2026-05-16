@@ -10,6 +10,7 @@
     "@void-gladiator/persistence": "workspace:*",
     "@void-gladiator/protocol": "workspace:*",
     "@void-gladiator/renderer-ansi": "workspace:*",
-    "@void-gladiator/terminal-input": "workspace:*"
+    "@void-gladiator/terminal-input": "workspace:*",
+    "ansi-escapes": "^7.3.0"
   }
 }

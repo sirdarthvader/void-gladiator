@@ -10,7 +10,12 @@ export { renderTitle } from './scenes/title.js';
 export { renderLobby } from './scenes/lobby.js';
 export { renderGameplay } from './scenes/gameplay.js';
 export { renderResults } from './scenes/results.js';
-export { normalizeFrame, FRAME_WIDTH, FRAME_HEIGHT } from './frame-buffer.js';
+export {
+  normalizeFrame,
+  resetFrameBuffer,
+  FRAME_WIDTH,
+  FRAME_HEIGHT,
+} from './frame-buffer.js';
 
 /**
  * Render any scene — the top-level render dispatcher.

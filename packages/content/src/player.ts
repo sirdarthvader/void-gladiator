@@ -5,16 +5,17 @@ export const PLAYER_RESPAWN_TICKS = 90; // 3 seconds at 30Hz
 
 /**
  * Glyphs and colors per player slot (0-indexed).
+ * `color` is a named color string (renderer-agnostic).
  */
 export interface PlayerVisual {
   glyph: string;
-  colorCode: string;
+  color: string;
   name: string;
 }
 
 export const PLAYER_VISUALS: readonly PlayerVisual[] = [
-  { glyph: '◆', colorCode: '\x1b[36m', name: 'Cyan' },
-  { glyph: '◇', colorCode: '\x1b[35m', name: 'Magenta' },
-  { glyph: '◈', colorCode: '\x1b[33m', name: 'Gold' },
-  { glyph: '▣', colorCode: '\x1b[32m', name: 'Jade' },
+  { glyph: '◆', color: 'cyan', name: 'Cyan' },
+  { glyph: '◇', color: 'magenta', name: 'Magenta' },
+  { glyph: '◈', color: 'yellow', name: 'Gold' },
+  { glyph: '▣', color: 'green', name: 'Jade' },
 ];
