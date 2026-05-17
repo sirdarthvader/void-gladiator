@@ -1,5 +1,12 @@
 # @void-gladiator/cli-game
 
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [[`70b2677`](https://github.com/sirdarthvader/void-gladiator/commit/70b267710ca81ae9fb09f8ddaee66d25def18e31)]:
+  - @void-gladiator/renderer-tk@1.1.0
+
 ## 0.2.0
 
 ### Minor Changes
