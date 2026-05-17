@@ -1,6 +1,6 @@
 # 001 — Enhanced Terminal-Kit Renderer (`renderer-tk`)
 
-**Status:** Phase 2 — Not started  
+**Status:** Complete  
 **Package:** `@void-gladiator/renderer-tk`
 
 ---
@@ -27,9 +27,9 @@ renderer-tk → terminal-kit (new dep)
 
 ```typescript
 interface Renderer {
-  init(): void;          // Enter alt screen, hide cursor, allocate buffers
-  render(state: AppState): void;  // Draw current frame (delta)
-  cleanup(): void;       // Restore terminal, show cursor, exit alt screen
+  init(): void; // Enter alt screen, hide cursor, allocate buffers
+  render(state: AppState): void; // Draw current frame (delta)
+  cleanup(): void; // Restore terminal, show cursor, exit alt screen
 }
 ```
 
@@ -49,39 +49,39 @@ The existing `renderer-ansi` gets a thin adapter wrapping its `renderFrame()` st
 
 Core ScreenBuffer infrastructure, sprite system, gameplay scene with rich visuals, app wiring.
 
-| Task | Description | Status |
-|------|-------------|--------|
-| 1a. Package scaffold | Create `packages/renderer-tk/` — package.json, project.json, tsconfig.json, src/index.ts. Install `terminal-kit`. | ✅ |
-| 1b. Renderer interface | Define `Renderer` interface. Adapt `renderer-ansi` with wrapper. | ✅ |
-| 1c. ScreenBuffer core | Init terminal-kit, create ScreenBuffer at frame dimensions, delta draw loop, cursor/alt-screen management. | ✅ |
-| 1d. Sprite system | `Sprite` type (2D cell array + transparency). Sprite defs for players (3×3), enemies, projectiles. | ✅ |
-| 1e. Gameplay scene | Arena borders, player sprites, enemy sprites, projectiles, HUD — all via ScreenBuffer. | ✅ |
-| 1f. App integration | `--renderer=enhanced\|classic` flag + `VOID_RENDERER` env var in `cli-game`. | ✅ |
-| 1g. Remaining scenes | Title, lobby, results screens via ScreenBuffer. | ✅ |
+| Task                   | Description                                                                                                       | Status |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------- | ------ |
+| 1a. Package scaffold   | Create `packages/renderer-tk/` — package.json, project.json, tsconfig.json, src/index.ts. Install `terminal-kit`. | ✅     |
+| 1b. Renderer interface | Define `Renderer` interface. Adapt `renderer-ansi` with wrapper.                                                  | ✅     |
+| 1c. ScreenBuffer core  | Init terminal-kit, create ScreenBuffer at frame dimensions, delta draw loop, cursor/alt-screen management.        | ✅     |
+| 1d. Sprite system      | `Sprite` type (2D cell array + transparency). Sprite defs for players (3×3), enemies, projectiles.                | ✅     |
+| 1e. Gameplay scene     | Arena borders, player sprites, enemy sprites, projectiles, HUD — all via ScreenBuffer.                            | ✅     |
+| 1f. App integration    | `--renderer=enhanced\|classic` flag + `VOID_RENDERER` env var in `cli-game`.                                      | ✅     |
+| 1g. Remaining scenes   | Title, lobby, results screens via ScreenBuffer.                                                                   | ✅     |
 
 ### Phase 2: Particle & Effect System
 
-| Task | Description | Status |
-|------|-------------|--------|
-| 2a. Render state | `RenderState` object for particles, timers, screen effects. | ⬜ |
-| 2b. Particle engine | Spawn/update/cull particles — explosion sparks, projectile trails, death bursts. | ⬜ |
-| 2c. Screen effects | Screen shake (draw offset), flash (color overlay on damage), hit markers. | ⬜ |
+| Task                | Description                                                                      | Status |
+| ------------------- | -------------------------------------------------------------------------------- | ------ |
+| 2a. Render state    | `RenderState` object for particles, timers, screen effects.                      | ✅     |
+| 2b. Particle engine | Spawn/update/cull particles — explosion sparks, projectile trails, death bursts. | ✅     |
+| 2c. Screen effects  | Screen shake (draw offset), flash (color overlay on damage), hit markers.        | ✅     |
 
 ### Phase 3: Ambience & Transitions
 
-| Task | Description | Status |
-|------|-------------|--------|
-| 3a. Background ambience | Drifting dim void particles, subtle color noise on arena floor. | ⬜ |
-| 3b. Scene transitions | Fade/wipe effects between scenes (title→lobby→gameplay→results). | ⬜ |
-| 3c. Animated title | Pulsing/glowing title text, starfield or void-themed background. | ⬜ |
+| Task                    | Description                                                      | Status |
+| ----------------------- | ---------------------------------------------------------------- | ------ |
+| 3a. Background ambience | Drifting dim void particles, subtle color noise on arena floor.  | ✅     |
+| 3b. Scene transitions   | Fade/wipe effects between scenes (title→lobby→gameplay→results). | ✅     |
+| 3c. Animated title      | Pulsing/glowing title text, starfield or void-themed background. | ✅     |
 
 ### Phase 4: Polish & Content
 
-| Task | Description | Status |
-|------|-------------|--------|
-| 4a. Extended sprite library | Unique multi-cell sprites per enemy kind, pickups, hazards. | ⬜ |
-| 4b. Color palettes | 256-color / truecolor gradients for health, energy, atmosphere. | ⬜ |
-| 4c. Visual config | User-tunable settings — particle density, color mode, reduced-motion. | ⬜ |
+| Task                        | Description                                                           | Status |
+| --------------------------- | --------------------------------------------------------------------- | ------ |
+| 4a. Extended sprite library | Unique multi-cell sprites per enemy kind, pickups, hazards.           | ✅     |
+| 4b. Color palettes          | 256-color / truecolor gradients for health, energy, atmosphere.       | ✅     |
+| 4c. Visual config           | User-tunable settings — particle density, color mode, reduced-motion. | ✅     |
 
 ---
 
@@ -114,7 +114,44 @@ Particles, screen shake, flash timers — all live outside `GameState`. The simu
 
 _Updated as work progresses. Newest entries at top._
 
+### 2026-05-17 — Fix: HUD invisible in enhanced renderer
+
+- **Root cause:** ScreenBuffer constructor used `x: 0, y: 0`, overriding terminal-kit's default of `(1, 1)` for Terminal destinations. The draw pipeline clips the 0-based buffer src rect against the 1-based terminal dst rect — `srcClipRect.ymin = max(0, 1-0) = 1` — silently discarding buffer row 0 (HUD) and column 0 (left border)
+- **Fix:** Removed explicit `x`/`y` from ScreenBuffer constructor; terminal-kit defaults to `(1, 1)` which correctly maps buffer `(0,0)` → terminal `(1,1)`
+- Moved HUD rendering to **after** all arena content (floor, entities, particles, players) so screen shake can never push arena cells over the HUD row
+- Particles and hit markers now clipped to the arena rectangle, preventing bleed into HUD or status bar
+- All typecheck, lint, and tests pass
+
+### 2026-05-17 — Phase 4 complete: Polish & Content
+
+- Extended sprite library: voidcrawler (2×1), wraith (1×2 ghostly), sentinel (2×2 armored), spitter (ranged). Added special projectile glyphs and pickup sprites (health, shield, speed, damage)
+- 256-color palette system: gradients for health (red→green), energy (blue→cyan), fire (red→white), void (black→purple), streak (white→red). Player-specific 4-color palettes (primary/bright/dim/trail)
+- Visual config via env vars: `VOID_PARTICLES` (0/1/2), `VOID_COLORS` (16/256/truecolor), `VOID_REDUCED_MOTION=1` (disables all animations). Config wired into renderer and render-state
+- Reduced motion mode: zero particles, no shake/flash, no transitions, no ambience/starfield
+- Particle cap scales with density multiplier
+
+### 2026-05-17 — Phase 3 complete: Ambience & Transitions
+
+- Created `ambience.ts`: drift particles (spawn at edges, float across arena, dim 256-color grays) + starfield system (twinkling stars with brightness cycling)
+- Created `transitions.ts`: TransitionState with fade_in (dissolving dark overlay) and wipe_down (row-by-row reveal) effects
+- Created `scenes/transition-overlay.ts`: renders fade/wipe on top of scene content using deterministic hash-based pattern
+- Title scene: starfield background (2% density, twinkling), color-cycling title glow (wave effect across characters, 256-color cyan gradient), pulsing prompt
+- Gameplay scene: ambient drift particles rendered beneath entities on the arena floor
+- Renderer orchestrates all: creates starfield on title entry, ticks ambience during gameplay, starts transition on every scene change (fade_in for menus, wipe_down for gameplay)
+- All effects are render-only — zero impact on simulation determinism
+
+### 2026-05-17 — Phase 2 complete: Particle & Effect System
+
+- Created `render-state.ts`: RenderState type with particles, hit markers, screen shake, flash — fully separate from GameState
+- Created `particles.ts`: Particle engine with spawn helpers for explosions (enemy death), death bursts (player death), hit sparks (damage), projectile trails (40% per-frame emit)
+- Created `effects.ts`: Screen shake (intensity stacking, decay), flash overlay (tinted arena floor), floating hit markers ("!" on damage)
+- Gameplay scene now renders all effects: particles with fade, shake offsets on arena content, flash as tinted bg, hit markers above entities
+- RenderState diffs consecutive GameplayState frames to auto-detect events (enemy removed → explosion, health decreased → hit sparks, player died → death burst)
+- Particle cap at 200 to prevent runaway allocations
+- RenderState is reset on scene change to avoid stale data
+
 ### 2026-05-17 — Fixed arena for multiplayer determinism
+
 - Reverted dynamic arena sizing: simulation uses fixed `ARENA_WIDTH=72` / `ARENA_HEIGHT=30`
 - Terminal size check now validates against fixed arena + margins (74×34 minimum)
 - Removed `ArenaConfig`, `createArenaConfig()`, `MIN_*` constants
@@ -123,6 +160,7 @@ _Updated as work progresses. Newest entries at top._
 - Design principle: simulation size = fixed (multiplayer-safe), rendering viewport = flexible (future enhancement)
 
 ### 2026-05-17 — Dynamic arena sizing
+
 - Arena now fills the entire terminal: `arenaWidth = cols - 2`, `arenaHeight = rows - 4`
 - Dimensions computed once at launch via `createArenaConfig()`, locked for the session
 - Minimum terminal size enforced (42×19): shows "terminal too small" message and exits if below
@@ -133,6 +171,7 @@ _Updated as work progresses. Newest entries at top._
 - All typecheck, lint, and tests pass
 
 ### 2026-05-16 — Phase 1 complete
+
 - Scaffolded `packages/renderer-tk/` with terminal-kit + @types/terminal-kit
 - Defined `Renderer` interface (init/render/cleanup) in `src/types.ts`
 - Built ScreenBuffer core (`src/screen.ts`): buffer creation, terminal lifecycle, cell/text/sprite drawing helpers with arena coordinate mapping and bounds clipping

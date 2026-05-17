@@ -75,10 +75,49 @@ export const getPlayerSprite = (playerId: number): Sprite => {
 // ── Enemy sprites ───────────────────────────────────────────────────
 
 const ENEMY_SPRITES: Record<string, Sprite> = {
+  // Shardling — small, fast, diamond-shaped
   shardling: {
     width: 1,
     height: 1,
     cells: [[C('x', 'red', { bold: true })]],
+    originX: 0,
+    originY: 0,
+  },
+  // Voidcrawler — slow, tanky, 2×1 horizontal
+  voidcrawler: {
+    width: 2,
+    height: 1,
+    cells: [[C('[', 'magenta', { bold: true }), C(']', 'magenta', { bold: true })]],
+    originX: 0,
+    originY: 0,
+  },
+  // Wraith — phasing, ghostly 1×2 vertical
+  wraith: {
+    width: 1,
+    height: 2,
+    cells: [
+      [C('^', 'cyan', { dim: true })],
+      [C('o', 'cyan')],
+    ],
+    originX: 0,
+    originY: 1,
+  },
+  // Sentinel — armored, 2×2 block
+  sentinel: {
+    width: 2,
+    height: 2,
+    cells: [
+      [C('/', 'yellow', { bold: true }), C('\\', 'yellow', { bold: true })],
+      [C('\\', 'yellow'), C('/', 'yellow')],
+    ],
+    originX: 0,
+    originY: 0,
+  },
+  // Spitter — ranged enemy, spiky look
+  spitter: {
+    width: 1,
+    height: 1,
+    cells: [[C('*', 'green', { bold: true })]],
     originX: 0,
     originY: 0,
   },
@@ -98,6 +137,48 @@ const PROJ_GLYPHS: Record<string, string> = {
 
 export const getProjectileGlyph = (direction: string): string =>
   PROJ_GLYPHS[direction] ?? '*';
+
+// ── Special projectile glyphs ───────────────────────────────────────
+
+export const SPECIAL_PROJ_GLYPHS: Record<string, string> = {
+  up: '!',
+  down: '!',
+  left: '=',
+  right: '=',
+};
+
+// ── Pickup sprites ──────────────────────────────────────────────────
+
+export const PICKUP_SPRITES: Record<string, Sprite> = {
+  health: {
+    width: 1,
+    height: 1,
+    cells: [[C('+', 'green', { bold: true })]],
+    originX: 0,
+    originY: 0,
+  },
+  shield: {
+    width: 1,
+    height: 1,
+    cells: [[C('O', 'cyan', { bold: true })]],
+    originX: 0,
+    originY: 0,
+  },
+  speed: {
+    width: 1,
+    height: 1,
+    cells: [[C('>', 'yellow', { bold: true })]],
+    originX: 0,
+    originY: 0,
+  },
+  damage: {
+    width: 1,
+    height: 1,
+    cells: [[C('!', 'red', { bold: true })]],
+    originX: 0,
+    originY: 0,
+  },
+};
 
 // ── Dead player marker ──────────────────────────────────────────────
 

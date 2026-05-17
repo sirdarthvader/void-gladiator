@@ -36,8 +36,6 @@ export const createScreen = (arenaWidth: number, arenaHeight: number): Screen =>
     width,
     height,
     dst: term,
-    x: 0,
-    y: 0,
   });
 
   return { buffer, width, height, arenaWidth, arenaHeight };
