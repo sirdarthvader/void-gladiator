@@ -1,5 +1,5 @@
 import type { TitleScene } from '@void-gladiator/game-core';
-import { bold, dim, cyan, whiteBright } from '../colors.js';
+import { bold, dim, cyan, yellow, whiteBright } from '../colors.js';
 import { buildTopBorder, buildBottomBorder } from '../components/ui.js';
 import { stringWidth, cursorToCol } from '../char-width.js';
 
@@ -53,13 +53,31 @@ export const renderTitle = (_state: TitleScene): string => {
   rows.push(emptyRow(width));
   rows.push(emptyRow(width));
 
-  // Prompt — static, no animation
-  rows.push(
-    borderedRow(
-      centerInWidth(whiteBright(bold('Press SPACE to start')), width),
-      width
-    )
-  );
+  if (_state.multiplayer) {
+    const mp = _state.multiplayer;
+    const roleTag = mp.role === 'host' ? cyan(bold('[HOST]')) : yellow(bold('[GUEST]'));
+    const addr =
+      mp.role === 'host'
+        ? `port ${mp.port ?? 7777}`
+        : (mp.server ?? 'localhost:7777');
+    const mpLine = `${roleTag}  ${whiteBright(mp.myName)} @ ${dim(addr)}`;
+    rows.push(borderedRow(centerInWidth(mpLine, width), width));
+    rows.push(emptyRow(width));
+    rows.push(
+      borderedRow(
+        centerInWidth(whiteBright(bold('Press ENTER to connect')), width),
+        width
+      )
+    );
+  } else {
+    // Prompt — static, no animation
+    rows.push(
+      borderedRow(
+        centerInWidth(whiteBright(bold('Press SPACE to start')), width),
+        width
+      )
+    );
+  }
 
   rows.push(emptyRow(width));
   rows.push(buildBottomBorder(width));

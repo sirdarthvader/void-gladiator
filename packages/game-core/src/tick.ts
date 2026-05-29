@@ -4,12 +4,15 @@ import { tickTitle } from './scenes/title.js';
 import { tickLobby } from './scenes/lobby.js';
 import { tickGameplay } from './scenes/gameplay.js';
 import { tickResults } from './scenes/results.js';
+import { tickMatchmaking } from './scenes/matchmaking.js';
+import type { MatchmakingNetworkPatch } from './scenes/matchmaking.js';
 
 /**
  * Per-player command input for a single tick.
  */
 export interface AppTickInput {
   commandsByPlayer: ReadonlyMap<number, readonly Command[]>;
+  matchmakingPatch?: MatchmakingNetworkPatch;
 }
 
 /**
@@ -25,6 +28,13 @@ export const tickApp = (state: AppState, input: AppTickInput): AppState => {
 
     case 'lobby':
       return tickLobby(state, input.commandsByPlayer);
+
+    case 'matchmaking':
+      return tickMatchmaking(
+        state,
+        input.commandsByPlayer,
+        input.matchmakingPatch
+      );
 
     case 'gameplay': {
       // Filter to only GameCommand for gameplay

@@ -56,6 +56,9 @@ importers:
       '@void-gladiator/game-core':
         specifier: workspace:*
         version: link:../../packages/game-core
+      '@void-gladiator/network-citadel':
+        specifier: workspace:*
+        version: link:../../packages/network-citadel
       '@void-gladiator/persistence':
         specifier: workspace:*
         version: link:../../packages/persistence
@@ -94,6 +97,8 @@ importers:
       '@void-gladiator/shared':
         specifier: workspace:*
         version: link:../shared
+
+  packages/network-citadel: {}
 
   packages/network-lan:
     dependencies:

@@ -14,6 +14,12 @@ export type {
   LobbyScene,
   GameplayScene,
   ResultsScene,
+  MatchmakingScene,
+  MatchmakingState,
+  MatchmakingPeer,
+  ChatLine,
+  ChatInput,
+  StartEnvelope,
 } from './types/index.js';
 
 // --- Scenes ---
@@ -26,7 +32,10 @@ export {
   createGameplayState,
   tickGameplay,
   tickResults,
+  createMatchmakingState,
+  tickMatchmaking,
 } from './scenes/index.js';
+export type { MatchmakingNetworkPatch } from './scenes/index.js';
 
 // --- Systems ---
 export { spawnEnemy } from './systems/spawning.js';

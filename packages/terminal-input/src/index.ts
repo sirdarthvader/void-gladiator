@@ -1,7 +1,7 @@
 import type { GameCommand, Command } from '@void-gladiator/protocol';
 
 const keyToGameCommand: Record<string, GameCommand | undefined> = {
-  '\u0003': 'quit',
+  '': 'quit',
   q: 'quit',
   Q: 'quit',
   w: 'move_up',
@@ -28,10 +28,14 @@ export interface TerminalInputController {
  * Scene-aware input controller.
  * Maps keys differently based on the current scene context.
  */
-export type SceneContext = 'title' | 'lobby' | 'gameplay' | 'results';
+export type SceneContext = 'title' | 'lobby' | 'gameplay' | 'results' | 'matchmaking';
 
 export interface SceneInputOptions {
   onCommand: (command: Command) => void;
+  /** Called with a single printable character while chat-input mode is active. */
+  onChatChar?: (char: string) => void;
+  /** True when the matchmaking scene is in chat-input mode (routes raw chars). */
+  getChatActive?: () => boolean;
   getScene: () => SceneContext;
   stream?: NodeJS.ReadStream;
 }
@@ -46,6 +50,8 @@ const ARROW_LEFT = '\x1b[D';
 // The controller can be attached and detached to manage event listeners and terminal modes cleanly.
 export const createSceneInput = ({
   onCommand,
+  onChatChar,
+  getChatActive,
   getScene,
   stream = process.stdin,
 }: SceneInputOptions): TerminalInputController => {
@@ -54,6 +60,7 @@ export const createSceneInput = ({
   const handleData = (chunk: Buffer | string): void => {
     const input = typeof chunk === 'string' ? chunk : chunk.toString('utf8');
     const scene = getScene();
+    const chatActive = getChatActive?.() ?? false;
 
     const fullInput = escBuffer + input;
     escBuffer = '';
@@ -64,25 +71,48 @@ export const createSceneInput = ({
       if (char === '\x1b') {
         const remaining = fullInput.slice(i);
         if (remaining.startsWith(ARROW_LEFT)) {
-          emitForScene(scene, 'arrow_left', onCommand);
+          if (!chatActive) emitForScene(scene, 'arrow_left', onCommand);
           i += 2;
           continue;
         } else if (remaining.startsWith(ARROW_RIGHT)) {
-          emitForScene(scene, 'arrow_right', onCommand);
+          if (!chatActive) emitForScene(scene, 'arrow_right', onCommand);
           i += 2;
           continue;
         } else if (remaining.startsWith(ARROW_UP)) {
-          emitForScene(scene, 'arrow_up', onCommand);
+          if (!chatActive) emitForScene(scene, 'arrow_up', onCommand);
           i += 2;
           continue;
         } else if (remaining.startsWith(ARROW_DOWN)) {
-          emitForScene(scene, 'arrow_down', onCommand);
+          if (!chatActive) emitForScene(scene, 'arrow_down', onCommand);
           i += 2;
           continue;
-        } else if (remaining.length < 3) {
-          // Incomplete escape sequence — buffer for next chunk.
+        } else if (remaining === '\x1b') {
+          // Standalone Esc — fire cancel immediately, don't buffer.
+          if (chatActive) {
+            onCommand('cancel_chat');
+          }
+          break;
+        } else if (remaining.length === 2 && remaining[1] === '[') {
+          // `\x1b[` split across chunks — buffer and wait for the final byte.
           escBuffer = remaining;
           break;
+        }
+        // Any other unrecognised escape — discard.
+        continue;
+      }
+
+      // Chat-capture mode: route printable chars + Enter + backspace
+      if (chatActive && scene === 'matchmaking') {
+        if (char === '\r' || char === '\n') {
+          onCommand('submit_chat');
+        } else if (char === '') {
+          // Ctrl-C still quits
+          onCommand('quit');
+        } else if (char === '' || char === '\b') {
+          // Backspace — signal via onChatChar with special token
+          onChatChar?.('');
+        } else if (char >= ' ') {
+          onChatChar?.(char);
         }
         continue;
       }
@@ -121,6 +151,10 @@ const emitForScene = (
     if (arrow === 'arrow_left') emit('select_mode_prev');
     if (arrow === 'arrow_right') emit('select_mode_next');
   }
+  if (scene === 'matchmaking') {
+    if (arrow === 'arrow_left') emit('select_mode_prev');
+    if (arrow === 'arrow_right') emit('select_mode_next');
+  }
 };
 
 const emitCharForScene = (
@@ -129,7 +163,7 @@ const emitCharForScene = (
   emit: (cmd: Command) => void
 ): void => {
   // Quit is universal.
-  if (char === '\u0003' || char === 'q' || char === 'Q') {
+  if (char === '' || char === 'q' || char === 'Q') {
     emit('quit');
     return;
   }
@@ -142,6 +176,13 @@ const emitCharForScene = (
     case 'lobby':
       if (char === ' ') emit('toggle_ready');
       if (char === '\r') emit('start_game');
+      if (char === 'a' || char === 'A') emit('select_mode_prev');
+      if (char === 'd' || char === 'D') emit('select_mode_next');
+      break;
+
+    case 'matchmaking':
+      if (char === 't' || char === 'T') emit('enter_chat');
+      if (char === ' ' || char === '\r') emit('start_session');
       if (char === 'a' || char === 'A') emit('select_mode_prev');
       if (char === 'd' || char === 'D') emit('select_mode_next');
       break;

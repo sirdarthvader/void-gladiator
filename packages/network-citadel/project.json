@@ -1,0 +1,6 @@
+{
+  "name": "network-citadel",
+  "projectType": "library",
+  "root": "packages/network-citadel",
+  "sourceRoot": "packages/network-citadel/src"
+}

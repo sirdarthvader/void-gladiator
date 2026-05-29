@@ -28,6 +28,7 @@ import { renderGameplay } from './scenes/gameplay.js';
 import { renderTitle } from './scenes/title.js';
 import { renderLobby } from './scenes/lobby.js';
 import { renderResults } from './scenes/results.js';
+import { renderMatchmaking } from './scenes/matchmaking.js';
 import { renderTransitionOverlay } from './scenes/transition-overlay.js';
 
 /**
@@ -93,6 +94,9 @@ export const createEnhancedRenderer = (): Renderer => {
           break;
         case 'lobby':
           renderLobby(state, s);
+          break;
+        case 'matchmaking':
+          renderMatchmaking(state, s);
           break;
         case 'gameplay':
           renderState = tickRenderState(renderState, state.gameplay, config);

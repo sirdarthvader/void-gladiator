@@ -3,6 +3,7 @@ import { renderTitle } from './scenes/title.js';
 import { renderLobby } from './scenes/lobby.js';
 import { renderGameplay } from './scenes/gameplay.js';
 import { renderResults } from './scenes/results.js';
+import { renderMatchmaking } from './scenes/matchmaking.js';
 import { normalizeFrame, computeFrameSize } from './frame-buffer.js';
 
 // Re-export scene renderers for direct use
@@ -10,6 +11,7 @@ export { renderTitle } from './scenes/title.js';
 export { renderLobby } from './scenes/lobby.js';
 export { renderGameplay } from './scenes/gameplay.js';
 export { renderResults } from './scenes/results.js';
+export { renderMatchmaking } from './scenes/matchmaking.js';
 export {
   normalizeFrame,
   computeFrameSize,
@@ -29,6 +31,9 @@ export const renderFrame = (state: AppState): string => {
       break;
     case 'lobby':
       raw = renderLobby(state);
+      break;
+    case 'matchmaking':
+      raw = renderMatchmaking(state);
       break;
     case 'gameplay':
       raw = renderGameplay(state);

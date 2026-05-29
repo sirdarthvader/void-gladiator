@@ -1,6 +1,7 @@
 import type { LobbyState } from './lobby-state.js';
 import type { GameplayState } from './gameplay-state.js';
 import type { ResultsState } from './results-state.js';
+import type { MatchmakingState } from './matchmaking-state.js';
 
 /**
  * Title scene — the initial splash screen.
@@ -10,6 +11,14 @@ export interface TitleScene {
   arenaWidth: number;
   arenaHeight: number;
   animationTick: number;
+  /** When set, title shows a multiplayer-mode banner instead of the solo start prompt. */
+  multiplayer?: {
+    role: 'host' | 'guest';
+    myName: string;
+    roomName: string;
+    server?: string;
+    port?: number;
+  };
 }
 
 /**
@@ -43,10 +52,25 @@ export interface ResultsScene {
 }
 
 /**
+ * Matchmaking scene — multiplayer lobby before gameplay (citadel-backed).
+ */
+export interface MatchmakingScene {
+  scene: 'matchmaking';
+  arenaWidth: number;
+  arenaHeight: number;
+  matchmaking: MatchmakingState;
+}
+
+/**
  * The top-level application state — a discriminated union of scenes.
  * The renderer and tick function switch on `state.scene` to determine behavior.
  *
  * `arenaWidth` and `arenaHeight` are available on every scene, set once
  * at startup from the terminal dimensions and carried through transitions.
  */
-export type AppState = TitleScene | LobbyScene | GameplayScene | ResultsScene;
+export type AppState =
+  | TitleScene
+  | LobbyScene
+  | GameplayScene
+  | ResultsScene
+  | MatchmakingScene;

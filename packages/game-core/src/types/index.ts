@@ -13,4 +13,12 @@ export type {
   LobbyScene,
   GameplayScene,
   ResultsScene,
+  MatchmakingScene,
 } from './app-state.js';
+export type {
+  MatchmakingState,
+  MatchmakingPeer,
+  ChatLine,
+  ChatInput,
+  StartEnvelope,
+} from './matchmaking-state.js';

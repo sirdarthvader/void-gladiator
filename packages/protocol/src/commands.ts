@@ -21,7 +21,11 @@ export type SceneCommand =
   | 'select_mode_prev'
   | 'rematch'
   | 'return_to_lobby'
-  | 'confirm';
+  | 'confirm'
+  | 'start_session'
+  | 'enter_chat'
+  | 'submit_chat'
+  | 'cancel_chat';
 
 /**
  * The full set of commands the system can process.
